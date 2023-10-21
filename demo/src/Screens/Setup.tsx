@@ -497,7 +497,7 @@ const styles = StyleSheet.create({
   backspaceText: {
     fontSize: 24,
     color: '#000000',
-    marginTop: Platform.OS == 'android' ? -12 : 0,
+    marginTop: Platform.OS === 'android' ? -12 : 0,
   },
   activityIndicator: {
     flex: 1,
