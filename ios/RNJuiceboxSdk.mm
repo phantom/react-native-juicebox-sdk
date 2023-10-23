@@ -32,13 +32,13 @@ RCT_EXTERN_METHOD(
 RCT_EXTERN_METHOD(
   createAuthentication:(NSArray *)realmIds
   signingParameters:(NSString *)signingParameters
-  userId:(NSString *)secret
+  secretId:(NSString *)secret
   resolve:(RCTPromiseResolveBlock)resolve
   reject:(RCTPromiseRejectBlock)reject
 )
 
 RCT_EXTERN_METHOD(
-  randomUserId:(RCTPromiseResolveBlock)resolve
+  randomSecretId:(RCTPromiseResolveBlock)resolve
   reject:(RCTPromiseRejectBlock)reject
 )
 

@@ -4,7 +4,7 @@ import JuiceboxSdk
 class RNJuiceboxSdk: NSObject {
     enum ArgumentError: Error {
         case invalidRealmId
-        case invalidUserId
+        case invalidSecretId
         case invalidConfiguration
     }
 
@@ -102,7 +102,7 @@ class RNJuiceboxSdk: NSObject {
     func createAuthentication(
         _ realmIds: [String],
         signingParameters: String,
-        userId: String,
+        secretId: String,
         resolve: @escaping RCTPromiseResolveBlock,
         reject: @escaping RCTPromiseRejectBlock
     ) {
@@ -119,25 +119,25 @@ class RNJuiceboxSdk: NSObject {
 
         let generator = AuthTokenGenerator(json: signingParameters)
 
-        guard let userId = UserId(string: userId) else {
-            return reject("invalidUserId", "invalid user id", ArgumentError.invalidUserId)
+        guard let secretId = SecretId(string: secretId) else {
+            return reject("invalidSecretId", "invalid user id", ArgumentError.invalidSecretId)
         }
 
         Task {
             var authentication = [String: String]()
             for realmId in realmIds {
-                authentication[realmId.string] = await generator.vend(realmId: realmId, userId: userId).string()
+                authentication[realmId.string] = await generator.vend(realmId: realmId, secretId: secretId).string()
             }
             resolve(authentication)
         }
     }
 
     @objc
-    func randomUserId(
+    func randomSecretId(
         _ resolve: @escaping RCTPromiseResolveBlock,
         reject: @escaping RCTPromiseRejectBlock
     ) {
-        resolve(UserId.random().string)
+        resolve(SecretId.random().string)
     }
 
     private func authentication(_ authentication: [String: String]) throws -> [RealmId: AuthToken] {

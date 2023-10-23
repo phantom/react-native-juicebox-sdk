@@ -1,9 +1,9 @@
 #import <React/RCTBridgeModule.h>
 
-@interface RCT_EXTERN_MODULE(UserIdStorage, NSObject)
+@interface RCT_EXTERN_MODULE(SecretIdStorage, NSObject)
 
 RCT_EXTERN_METHOD(
-  register:(NSString *)userId
+  register:(NSString *)secretId
   resolve:(RCTPromiseResolveBlock)resolve
   reject:(RCTPromiseRejectBlock)reject
 )

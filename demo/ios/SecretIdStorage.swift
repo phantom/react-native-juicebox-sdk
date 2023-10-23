@@ -9,8 +9,8 @@ import Foundation
 import CloudKit
 import React
 
-@objc(UserIdStorage)
-class UserIdStorage: NSObject {
+@objc(SecretIdStorage)
+class SecretIdStorage: NSObject {
   enum AccountError: Error {
     case notRegistered
     case parentalRestriction
@@ -19,18 +19,18 @@ class UserIdStorage: NSObject {
 
   let container = CKContainer.default()
 
-  static let userId = "UserId"
-  let userIdRecordId = CKRecord.ID(recordName: userId)
+  static let secretId = "SecretId"
+  let secretIdRecordId = CKRecord.ID(recordName: secretId)
 
   @objc
   func register(
-    _ userId: String,
+    _ secretId: String,
     resolve: @escaping RCTPromiseResolveBlock,
     reject: @escaping RCTPromiseRejectBlock
   ) {
     Task {
-      let record = CKRecord(recordType: Self.userId, recordID: userIdRecordId)
-      record.setObject(userId as NSString, forKey: Self.userId)
+      let record = CKRecord(recordType: Self.secretId, recordID: secretIdRecordId)
+      record.setObject(secretId as NSString, forKey: Self.secretId)
 
       do {
         try await checkAccountStatus()
@@ -50,11 +50,11 @@ class UserIdStorage: NSObject {
     Task {
       do {
         try await checkAccountStatus()
-        let record = try await container.privateCloudDatabase.record(for: userIdRecordId)
-        guard let userId = record.object(forKey: Self.userId) as? String else {
+        let record = try await container.privateCloudDatabase.record(for: secretIdRecordId)
+        guard let secretId = record.object(forKey: Self.secretId) as? String else {
           throw AccountError.noRecord
         }
-        resolve(userId)
+        resolve(secretId)
       } catch {
         reject("\((error as NSError).code)", "Failed to fetch record: \(error)", error)
       }

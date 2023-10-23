@@ -25,7 +25,7 @@ import { randomBytes } from 'react-native-randombytes';
 import Toast from 'react-native-toast-message';
 import { CommonActions } from '@react-navigation/native';
 
-const { UserIdStorage } = NativeModules;
+const { SecretIdStorage } = NativeModules;
 
 enum Mode {
   Create = 'Create',
@@ -44,7 +44,7 @@ const Setup = ({ navigation, route }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [secret, setSecret] = useState<Uint8Array | null>(null);
   const [mode, setMode] = useState<Mode>(route.params.mode);
-  const [userId, setUserId] = useState<string | null>(null);
+  const [secretId, setSecretId] = useState<string | null>(null);
   const [createPin, setCreatePin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const [recoverPin, setRecoverPin] = useState('');
@@ -87,24 +87,24 @@ const Setup = ({ navigation, route }) => {
     };
     if (mode === Mode.Create) createSecret();
 
-    if (userId != null) return;
+    if (secretId != null) return;
 
-    const createUserId = async () => {
+    const createSecretId = async () => {
       try {
-        setUserId(await UserIdStorage.recover());
+        setSecretId(await SecretIdStorage.recover());
       } catch (e) {
         // @ts-ignore
         if (e.message === 'google drive unavailable') {
           showNotSignedInError();
         } else {
-          setUserId(await JuiceboxSdk.randomUserId());
+          setSecretId(await JuiceboxSdk.randomSecretId());
         }
       }
     };
 
-    const restoreUserId = async () => {
+    const restoreSecretId = async () => {
       try {
-        setUserId(await UserIdStorage.recover());
+        setSecretId(await SecretIdStorage.recover());
       } catch (e) {
         showNotSignedInError(
           // @ts-ignore
@@ -118,10 +118,10 @@ const Setup = ({ navigation, route }) => {
     switch (mode) {
       case Mode.Create:
       case Mode.Confirm:
-        createUserId();
+        createSecretId();
         break;
       case Mode.Recover:
-        restoreUserId();
+        restoreSecretId();
         break;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -145,7 +145,7 @@ const Setup = ({ navigation, route }) => {
     if (confirmPin.length === 6) {
       if (createPin === confirmPin) {
         // Store the PIN and navigate to the next screen
-        storeUserIdAndSecretAndProceed();
+        storeSecretIdAndSecretAndProceed();
       } else {
         // Display an action sheet when PINs don't match
         showErrorSheet('Incorrect PIN');
@@ -164,13 +164,13 @@ const Setup = ({ navigation, route }) => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recoverPin]);
 
-  const storeUserIdAndSecretAndProceed = async () => {
+  const storeSecretIdAndSecretAndProceed = async () => {
     setIsLoading(true);
 
     const authentication = await JuiceboxSdk.createAuthentication(
       configuration,
       signingParameters,
-      userId!
+      secretId!
     );
 
     try {
@@ -179,7 +179,7 @@ const Setup = ({ navigation, route }) => {
         authentication,
         encoder.encode(createPin),
         secret!,
-        encoder.encode(userId!),
+        encoder.encode(secretId!),
         10
       );
     } catch (e) {
@@ -189,7 +189,7 @@ const Setup = ({ navigation, route }) => {
     }
 
     try {
-      await UserIdStorage.register(userId);
+      await SecretIdStorage.register(secretId);
     } catch (error) {
       showNotSignedInError();
       setIsLoading(false);
@@ -206,7 +206,7 @@ const Setup = ({ navigation, route }) => {
     const authentication = await JuiceboxSdk.createAuthentication(
       configuration,
       signingParameters,
-      userId!
+      secretId!
     );
 
     try {
@@ -214,7 +214,7 @@ const Setup = ({ navigation, route }) => {
         configuration,
         authentication,
         encoder.encode(recoverPin),
-        encoder.encode(userId!)
+        encoder.encode(secretId!)
       );
       setSecret(recoveredSecret);
       navigateToSecret(recoveredSecret);

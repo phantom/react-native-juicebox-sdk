@@ -112,24 +112,24 @@ class RNJuiceboxSdkModule(reactContext: ReactApplicationContext) :
   fun createAuthentication(
     realmIds: ReadableArray,
     signingParameters: String,
-    userId: String,
+    secretId: String,
     promise: Promise
   ) {
     val realmIds = realmIds.toArrayList().map { RealmId(it.toString()) }
 
     val generator = AuthTokenGenerator(signingParameters)
-    val userId = UserId(userId)
+    val secretId = SecretId(secretId)
 
     var authentication = Arguments.createMap()
     for (realmId in realmIds) {
-      authentication.putString(realmId.toString(), generator.vend(realmId, userId).toString())
+      authentication.putString(realmId.toString(), generator.vend(realmId, secretId).toString())
     }
     promise.resolve(authentication)
   }
 
   @ReactMethod
-  fun randomUserId(promise: Promise) {
-    promise.resolve(UserId.random().toString())
+  fun randomSecretId(promise: Promise) {
+    promise.resolve(SecretId.random().toString())
   }
 
   companion object {

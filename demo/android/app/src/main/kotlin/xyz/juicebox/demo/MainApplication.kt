@@ -17,7 +17,7 @@ class MainApplication : Application(), ReactApplication {
 
         override fun getPackages(): List<ReactPackage> {
             var packages = PackageList(this).packages
-            packages.add(UserIdStoragePackage())
+            packages.add(SecretIdStoragePackage())
             return packages
         }
 

@@ -132,9 +132,9 @@ export enum DeleteError {
 export type RealmId = string;
 
 /**
- * A 16-byte hexadecimal identifier for a user.
+ * A 16-byte hexadecimal identifier for a secret.
  */
-export type UserId = string;
+export type SecretId = string;
 
 /**
  * A JWT token used for authentication with a `Realm`.
@@ -313,7 +313,7 @@ export interface JuiceboxSdk {
    * authenticate with.
    * @param {AuthenticationSigningParameters} signingParameters – The
    * parameters to use when signing the tokens.
-   * @param {UserId} user_id – The 16-byte hexadecimal user identifier to
+   * @param {SecretId} secretId – The 16-byte hexadecimal secret identifier to
    * authorize the tokens for.
    *
    * @returns {AuthenticationToken} - An authentication token.
@@ -321,13 +321,13 @@ export interface JuiceboxSdk {
   createAuthentication(
     configuration: Configuration,
     signingParameters: AuthenticationSigningParameters,
-    userId: UserId
+    secretId: SecretId
   ): Promise<Authentication>;
 
   /**
-   * Generate a new random user id.
+   * Generate a new random secret id.
    */
-  randomUserId(): Promise<UserId>;
+  randomSecretId(): Promise<SecretId>;
 }
 
 export default {
@@ -442,5 +442,5 @@ export default {
       JSON.stringify(s),
       u
     ),
-  randomUserId: RNJuiceboxSdk.randomUserId,
+  randomSecretId: RNJuiceboxSdk.randomSecretId,
 } as JuiceboxSdk;

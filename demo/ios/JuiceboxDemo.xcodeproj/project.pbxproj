@@ -14,9 +14,8 @@
 		2FFBDCD3B39449F8A742135D /* libPods-JuiceboxDemo-JuiceboxDemoTests.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 4F63DE2375216F22D6134965 /* libPods-JuiceboxDemo-JuiceboxDemoTests.a */; };
 		81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */; };
 		97A3136814EEE8E63C0B930C /* libPods-JuiceboxDemo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 21170A9268AB832DC1D321D8 /* libPods-JuiceboxDemo.a */; };
-		F56610D82ADDDE4B00E987B4 /* UserIdStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F56610D72ADDDE4B00E987B4 /* UserIdStorage.swift */; };
-		F56610F72ADF6F6300E987B4 /* UserIdStorage.mm in Sources */ = {isa = PBXBuildFile; fileRef = F56610F62ADF6F6300E987B4 /* UserIdStorage.mm */; };
-		F56610FB2ADF7EC000E987B4 /* Entitlements.plist in Resources */ = {isa = PBXBuildFile; fileRef = F56610FA2ADF7EC000E987B4 /* Entitlements.plist */; };
+		F550C6FB2AE723D3004442A0 /* SecretIdStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = F550C6F92AE723D3004442A0 /* SecretIdStorage.swift */; };
+		F550C6FC2AE723D3004442A0 /* SecretIdStorage.mm in Sources */ = {isa = PBXBuildFile; fileRef = F550C6FA2AE723D3004442A0 /* SecretIdStorage.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,9 +46,9 @@
 		81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = LaunchScreen.storyboard; path = JuiceboxDemo/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		89C6BE57DB24E9ADA2F236DE /* Pods-JuiceboxDemo-JuiceboxDemoTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-JuiceboxDemo-JuiceboxDemoTests.release.xcconfig"; path = "Target Support Files/Pods-JuiceboxDemo-JuiceboxDemoTests/Pods-JuiceboxDemo-JuiceboxDemoTests.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
+		F550C6F92AE723D3004442A0 /* SecretIdStorage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SecretIdStorage.swift; sourceTree = "<group>"; };
+		F550C6FA2AE723D3004442A0 /* SecretIdStorage.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = SecretIdStorage.mm; sourceTree = "<group>"; };
 		F56610D62ADDDE4A00E987B4 /* JuiceboxDemo-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "JuiceboxDemo-Bridging-Header.h"; sourceTree = "<group>"; };
-		F56610D72ADDDE4B00E987B4 /* UserIdStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserIdStorage.swift; sourceTree = "<group>"; };
-		F56610F62ADF6F6300E987B4 /* UserIdStorage.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = UserIdStorage.mm; sourceTree = "<group>"; };
 		F56610FA2ADF7EC000E987B4 /* Entitlements.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Entitlements.plist; path = JuiceboxDemo/Entitlements.plist; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -99,9 +98,9 @@
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				81AB9BB72411601600AC10FF /* LaunchScreen.storyboard */,
 				13B07FB71A68108700A75B9A /* main.m */,
-				F56610D72ADDDE4B00E987B4 /* UserIdStorage.swift */,
+				F550C6FA2AE723D3004442A0 /* SecretIdStorage.mm */,
+				F550C6F92AE723D3004442A0 /* SecretIdStorage.swift */,
 				F56610D62ADDDE4A00E987B4 /* JuiceboxDemo-Bridging-Header.h */,
-				F56610F62ADF6F6300E987B4 /* UserIdStorage.mm */,
 				F56610FA2ADF7EC000E987B4 /* Entitlements.plist */,
 			);
 			name = JuiceboxDemo;
@@ -253,7 +252,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F56610FB2ADF7EC000E987B4 /* Entitlements.plist in Resources */,
 				81AB9BB82411601600AC10FF /* LaunchScreen.storyboard in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 			);
@@ -424,10 +422,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				F56610D82ADDDE4B00E987B4 /* UserIdStorage.swift in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
+				F550C6FC2AE723D3004442A0 /* SecretIdStorage.mm in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
-				F56610F72ADF6F6300E987B4 /* UserIdStorage.mm in Sources */,
+				F550C6FB2AE723D3004442A0 /* SecretIdStorage.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
