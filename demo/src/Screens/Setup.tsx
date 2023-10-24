@@ -48,6 +48,7 @@ const Setup = ({ navigation, route }) => {
   const [createPin, setCreatePin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const [recoverPin, setRecoverPin] = useState('');
+  const PIN_LENGTH = 6;
 
   const configuration = {
     realms: [
@@ -131,8 +132,8 @@ const Setup = ({ navigation, route }) => {
     if (mode !== Mode.Create) {
       return;
     }
-    if (createPin.length === 6) {
-      // Automatically move to the confirmation step when 6 digits are entered
+    if (createPin.length === PIN_LENGTH) {
+      // Automatically move to the confirmation step when PIN_LENGTH digits are entered
       setMode(Mode.Confirm);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -142,7 +143,7 @@ const Setup = ({ navigation, route }) => {
     if (mode !== Mode.Confirm) {
       return;
     }
-    if (confirmPin.length === 6) {
+    if (confirmPin.length === PIN_LENGTH) {
       if (createPin === confirmPin) {
         // Store the PIN and navigate to the next screen
         storeSecretIdAndSecretAndProceed();
@@ -158,7 +159,7 @@ const Setup = ({ navigation, route }) => {
     if (mode !== Mode.Recover) {
       return;
     }
-    if (recoverPin.length === 6) {
+    if (recoverPin.length === PIN_LENGTH) {
       recoverSecretAndProceed();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -281,17 +282,17 @@ const Setup = ({ navigation, route }) => {
     Toast.hide();
     switch (mode) {
       case Mode.Create:
-        if (createPin.length < 6) {
+        if (createPin.length < PIN_LENGTH) {
           setCreatePin(createPin + number);
         }
         break;
       case Mode.Confirm:
-        if (confirmPin.length < 6) {
+        if (confirmPin.length < PIN_LENGTH) {
           setConfirmPin(confirmPin + number);
         }
         break;
       case Mode.Recover:
-        if (recoverPin.length < 6) {
+        if (recoverPin.length < PIN_LENGTH) {
           setRecoverPin(recoverPin + number);
         }
         break;
@@ -374,7 +375,7 @@ const Setup = ({ navigation, route }) => {
     <View style={styles.container}>
       <Text style={styles.stepText}>{modeTitleMapping[mode]}</Text>
       <View style={styles.pinContainer}>
-        {Array(6)
+        {Array(PIN_LENGTH)
           .fill(0)
           .map((_, index) => (
             <View key={index} style={styles.pinCircle}>
