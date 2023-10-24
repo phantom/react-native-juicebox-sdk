@@ -8,7 +8,7 @@ on:
       - main
 
 env:
-  INSTALL_RUST_VERSION: "1.72"
+  INSTALL_RUST_VERSION: "1.73"
 
 jobs:
   lint:
@@ -146,6 +146,7 @@ jobs:
             ${{ runner.os }}-cocoapods-
 
       - name: Install Rust
+        if: env.turbo_cache_hit != 1 && steps.cocoapods-cache.outputs.cache-hit != 'true'
         run: |
           rustup toolchain install ${{ env.INSTALL_RUST_VERSION }} --profile minimal --target x86_64-apple-ios,aarch64-apple-ios,aarch64-apple-ios-sim
           rustup default ${{ env.INSTALL_RUST_VERSION }}
@@ -154,6 +155,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Set up Git
+        if: env.turbo_cache_hit != 1 && steps.cocoapods-cache.outputs.cache-hit != 'true'
         run: |
           # Configures the global `git` CLI to be able to access private repos.
           # `pod` will make use of this.
