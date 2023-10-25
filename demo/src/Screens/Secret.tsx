@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  Platform,
+} from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions } from '@react-navigation/native';
 
@@ -71,12 +78,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#f7f7f7',
     borderRadius: 20,
     alignItems: 'center',
-    maxWidth: 375,
+    maxWidth: 360,
   },
   secretText: {
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '300',
-    fontFamily: 'monospace',
+    fontFamily: Platform.OS === 'ios' ? 'Courier New' : 'monospace',
     color: '#032f62',
     paddingVertical: 10,
     paddingHorizontal: 20,

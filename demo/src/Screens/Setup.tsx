@@ -90,12 +90,27 @@ const Setup = ({ navigation, route }) => {
 
     if (secretId != null) return;
 
+    const isNotSignedInError = ({
+      message,
+      code,
+      domain,
+    }: {
+      message: string;
+      code: string;
+      domain: string | undefined;
+    }) => {
+      if (message === 'google drive unavailable') return true;
+      if (code === '0' && domain === 'Juicebox.SecretIdStorage.AccountError')
+        return true;
+      return false;
+    };
+
     const createSecretId = async () => {
       try {
         setSecretId(await SecretIdStorage.recover());
       } catch (e) {
         // @ts-ignore
-        if (e.message === 'google drive unavailable') {
+        if (isNotSignedInError(e)) {
           showNotSignedInError();
         } else {
           setSecretId(await JuiceboxSdk.randomSecretId());
@@ -109,9 +124,7 @@ const Setup = ({ navigation, route }) => {
       } catch (e) {
         showNotSignedInError(
           // @ts-ignore
-          e.message !== 'google drive unavailable'
-            ? 'An existing account was not found.'
-            : null
+          !isNotSignedInError(e) ? 'An existing account was not found.' : null
         );
       }
     };

@@ -19,8 +19,8 @@ class SecretIdStorage: NSObject {
 
   let container = CKContainer.default()
 
-  static let secretId = "SecretId"
-  let secretIdRecordId = CKRecord.ID(recordName: secretId)
+  static let recordType = "SecretId"
+  static let recordId = CKRecord.ID(recordName: "xyz.juicebox.jbid")
 
   @objc
   func register(
@@ -29,12 +29,20 @@ class SecretIdStorage: NSObject {
     reject: @escaping RCTPromiseRejectBlock
   ) {
     Task {
-      let record = CKRecord(recordType: Self.secretId, recordID: secretIdRecordId)
-      record.setObject(secretId as NSString, forKey: Self.secretId)
-
       do {
         try await checkAccountStatus()
+
+        let record: CKRecord
+
+        do {
+          record = try await fetchExistingRecord()
+        } catch AccountError.noRecord {
+          record = CKRecord(recordType: Self.recordType, recordID: Self.recordId)
+        }
+
+        record.setValue(secretId, forKey: Self.recordType)
         try await container.privateCloudDatabase.save(record)
+
         resolve(())
       } catch {
         reject("\((error as NSError).code)", "Failed to save record: \(error)", error)
@@ -50,8 +58,8 @@ class SecretIdStorage: NSObject {
     Task {
       do {
         try await checkAccountStatus()
-        let record = try await container.privateCloudDatabase.record(for: secretIdRecordId)
-        guard let secretId = record.object(forKey: Self.secretId) as? String else {
+        let record = try await fetchExistingRecord()
+        guard let secretId = record.value(forKey: Self.recordType) as? String else {
           throw AccountError.noRecord
         }
         resolve(secretId)
@@ -61,7 +69,15 @@ class SecretIdStorage: NSObject {
     }
   }
 
-  func checkAccountStatus() async throws {
+  private func fetchExistingRecord() async throws -> CKRecord {
+    do {
+      return try await container.privateCloudDatabase.record(for: Self.recordId)
+    } catch CKError.unknownItem {
+      throw AccountError.noRecord
+    }
+  }
+
+  private func checkAccountStatus() async throws {
     switch try await container.accountStatus() {
     case .couldNotDetermine, .noAccount, .temporarilyUnavailable:
       throw AccountError.notRegistered
