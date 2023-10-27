@@ -4,9 +4,9 @@ import {
   Text,
   TouchableOpacity,
   StyleSheet,
-  Image,
   Platform,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions } from '@react-navigation/native';
 
@@ -33,31 +33,26 @@ const Secret = ({ navigation, route }) => {
   }, [route]);
 
   return (
-    <View style={styles.container}>
-      <View style={styles.roundRect}>
-        <Text style={styles.secretLabel}>Your Secret</Text>
-        <Text style={styles.secretText}>{secret}</Text>
-        <View style={styles.checkmarkRow}>
-          <Image
-            source={require('../../assets/checkmark.png')}
-            style={styles.checkmark}
-          />
-          <Text style={styles.backedUpText}>Registered with Juicebox</Text>
-        </View>
-      </View>
+    <SafeAreaView style={styles.container}>
       <TouchableOpacity style={styles.signOutButton} onPress={handleSignOut}>
         <Text style={styles.signOutButtonText}>Sign Out</Text>
       </TouchableOpacity>
-    </View>
+      <View style={styles.roundRectContainer}>
+        <View style={styles.roundRect}>
+          <Text style={styles.secretLabel}>Secret Key</Text>
+          <Text style={styles.secretText}>{secret}</Text>
+        </View>
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#ffffff',
+    alignItems: 'flex-end',
+    justifyContent: 'flex-start',
+    backgroundColor: '#1c1c1c',
   },
   checkmarkRow: {
     flexDirection: 'row',
@@ -69,29 +64,38 @@ const styles = StyleSheet.create({
     height: 15,
   },
   backedUpText: {
-    color: '#43A047',
+    color: '#006400',
     marginLeft: 8,
     fontSize: 14,
     fontWeight: 'bold',
   },
-  roundRect: {
-    backgroundColor: '#f7f7f7',
-    borderRadius: 20,
+  roundRectContainer: {
+    width: '100%',
+    flex: 1,
     alignItems: 'center',
-    maxWidth: 360,
+    justifyContent: 'center',
+  },
+  roundRect: {
+    backgroundColor: '#181818',
+    borderColor: '#474747',
+    borderWidth: 1,
+    borderRadius: 18,
+    alignItems: 'flex-start',
+    minWidth: 360,
+    paddingHorizontal: 20,
   },
   secretText: {
     fontSize: 15,
     fontWeight: '300',
     fontFamily: Platform.OS === 'ios' ? 'Courier New' : 'monospace',
-    color: '#032f62',
+    color: '#ABABAB',
     paddingVertical: 10,
-    paddingHorizontal: 20,
+    marginBottom: 8,
   },
   secretLabel: {
     fontWeight: 'bold',
     fontSize: 14,
-    color: '#6a737d',
+    color: '#ffffff',
     marginTop: 15,
   },
   signOutButton: {
@@ -99,7 +103,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   signOutButtonText: {
-    color: '#531ac8',
+    color: '#fffdf8',
     fontSize: 14,
     fontWeight: 'bold',
   },

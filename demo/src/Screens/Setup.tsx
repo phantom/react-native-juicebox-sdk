@@ -1,8 +1,9 @@
 if (typeof Buffer === 'undefined') {
   global.Buffer = require('buffer').Buffer;
 }
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
+  Alert,
   ActivityIndicator,
   View,
   Text,
@@ -10,9 +11,12 @@ import {
   StyleSheet,
   NativeModules,
   Platform,
+  Image,
+  Animated,
+  Easing,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import ActionSheet from 'react-native-action-sheet';
 import JuiceboxSdk, {
   type Configuration,
   type AuthenticationSigningParameters,
@@ -22,7 +26,6 @@ import JuiceboxSdk, {
 } from 'react-native-juicebox-sdk';
 // @ts-ignore
 import { randomBytes } from 'react-native-randombytes';
-import Toast from 'react-native-toast-message';
 import { CommonActions } from '@react-navigation/native';
 
 const { SecretIdStorage } = NativeModules;
@@ -33,12 +36,6 @@ enum Mode {
   Recover = 'Recover',
 }
 
-const modeTitleMapping = {
-  [Mode.Create]: 'Create your PIN',
-  [Mode.Confirm]: 'Confirm your PIN',
-  [Mode.Recover]: 'Enter your PIN',
-};
-
 // @ts-ignore
 const Setup = ({ navigation, route }) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -48,7 +45,68 @@ const Setup = ({ navigation, route }) => {
   const [createPin, setCreatePin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const [recoverPin, setRecoverPin] = useState('');
+  const [message, setMessage] = useState('');
+
   const PIN_LENGTH = 6;
+  const ALLOWED_GUESSES = 5;
+
+  const titleForMode = (m: Mode) => {
+    switch (m) {
+      case Mode.Create:
+      case Mode.Confirm:
+        return 'Create passcode';
+      case Mode.Recover:
+        return 'Enter passcode';
+    }
+  };
+
+  const subtitleForMode = (m: Mode) => {
+    switch (m) {
+      case Mode.Create:
+      case Mode.Confirm:
+        return (
+          'Set a ' +
+          PIN_LENGTH +
+          '-digit passcode to recover and unlock your secret.'
+        );
+      case Mode.Recover:
+        return (
+          'Use the ' +
+          PIN_LENGTH +
+          '-digit passcode you created when creating your secret.'
+        );
+    }
+  };
+
+  const shakeAnimation = useRef(new Animated.Value(0)).current;
+
+  const playShakeAnimation = () =>
+    Animated.sequence([
+      Animated.timing(shakeAnimation, {
+        toValue: 10,
+        duration: 100,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shakeAnimation, {
+        toValue: -10,
+        duration: 100,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shakeAnimation, {
+        toValue: 10,
+        duration: 100,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
+      Animated.timing(shakeAnimation, {
+        toValue: 0,
+        duration: 100,
+        easing: Easing.linear,
+        useNativeDriver: true,
+      }),
+    ]).start();
 
   const configuration = {
     realms: [
@@ -91,7 +149,7 @@ const Setup = ({ navigation, route }) => {
     if (secretId != null) return;
 
     const isNotSignedInError = ({
-      message,
+      message: m,
       code,
       domain,
     }: {
@@ -99,7 +157,7 @@ const Setup = ({ navigation, route }) => {
       code: string;
       domain: string | undefined;
     }) => {
-      if (message === 'google drive unavailable') return true;
+      if (m === 'google drive unavailable') return true;
       if (code === '0' && domain === 'Juicebox.SecretIdStorage.AccountError')
         return true;
       return false;
@@ -108,6 +166,7 @@ const Setup = ({ navigation, route }) => {
     const createSecretId = async () => {
       try {
         setSecretId(await SecretIdStorage.recover());
+        showDoYouWantToRestore();
       } catch (e) {
         // @ts-ignore
         if (isNotSignedInError(e)) {
@@ -148,6 +207,7 @@ const Setup = ({ navigation, route }) => {
     if (createPin.length === PIN_LENGTH) {
       // Automatically move to the confirmation step when PIN_LENGTH digits are entered
       setMode(Mode.Confirm);
+      setMessage('Re-type your passcode');
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [createPin]);
@@ -161,8 +221,11 @@ const Setup = ({ navigation, route }) => {
         // Store the PIN and navigate to the next screen
         storeSecretIdAndSecretAndProceed();
       } else {
-        // Display an action sheet when PINs don't match
-        showErrorSheet('Incorrect PIN');
+        playShakeAnimation();
+        setMessage('Passcodes do not match. Try again');
+        setConfirmPin('');
+        setCreatePin('');
+        setMode(Mode.Create);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -179,6 +242,7 @@ const Setup = ({ navigation, route }) => {
   }, [recoverPin]);
 
   const storeSecretIdAndSecretAndProceed = async () => {
+    setMessage('');
     setIsLoading(true);
 
     const authentication = await JuiceboxSdk.createAuthentication(
@@ -194,10 +258,10 @@ const Setup = ({ navigation, route }) => {
         encoder.encode(createPin),
         secret!,
         encoder.encode(secretId!),
-        10
+        ALLOWED_GUESSES
       );
     } catch (e) {
-      showErrorSheet('Failed to Register (' + e + ')');
+      showErrorAlert('Failed to Register (' + e + ')');
       setIsLoading(false);
       return;
     }
@@ -212,6 +276,28 @@ const Setup = ({ navigation, route }) => {
 
     setIsLoading(false);
     await navigateToSecret(secret!);
+  };
+
+  const showDoYouWantToRestore = () => {
+    Alert.alert(
+      'Recover existing secret?',
+      'An existing secret was detected. If you create a new secret, your existing secret will be permanently unrecoverable.',
+      [
+        {
+          text: 'Recover Existing Secret',
+          isPreferred: true,
+          onPress: () => {
+            setMode(Mode.Recover);
+          },
+        },
+        {
+          text: 'Create New Secret',
+          style: 'destructive',
+          onPress: () => {},
+        },
+      ],
+      { cancelable: false }
+    );
   };
 
   const recoverSecretAndProceed = async () => {
@@ -236,45 +322,34 @@ const Setup = ({ navigation, route }) => {
       if (e instanceof RecoverError) {
         switch (e.reason) {
           case RecoverErrorReason.InvalidPin:
-            switch (e.guessesRemaining) {
-              case 1:
-                setRecoverPin('');
-                Toast.show({
-                  type: 'error',
-                  position: 'bottom',
-                  text1: 'Invalid PIN',
-                  text2: '1 guess remaining.',
-                });
-                break;
-              case 0:
-                showErrorSheet(
-                  'Invalid PIN, no guesses remaining. Your secret has been destroyed.',
-                  true
-                );
-                break;
-              default:
-                setRecoverPin('');
-                Toast.show({
-                  type: 'error',
-                  position: 'bottom',
-                  text1: 'Invalid PIN',
-                  text2: e.guessesRemaining + ' guesses remaining.',
-                });
-                break;
+            setRecoverPin('');
+            if (e.guessesRemaining! > 0) {
+              playShakeAnimation();
+              setMessage(
+                'Incorrect passcode, try again\n\n' +
+                  e.guessesRemaining +
+                  ' / ' +
+                  ALLOWED_GUESSES +
+                  ' attempts remaining'
+              );
+            } else {
+              await SecretIdStorage.delete();
+              setMode(Mode.Create);
+              setMessage('Unrecoverable, create a new secret');
             }
-
             break;
           case RecoverErrorReason.NotRegistered:
-            showErrorSheet('Secret not registered.', true);
+            await SecretIdStorage.delete();
+            setMode(Mode.Create);
+            setMessage('No existing secret, create a new secret');
             break;
           default:
-            showErrorSheet(
-              'Failed to Recover (' + RecoverErrorReason[e.reason] + ')',
-              true
+            showErrorAlert(
+              'Failed to Recover (' + RecoverErrorReason[e.reason] + ')'
             );
         }
       } else {
-        showErrorSheet('Failed to Recover (' + JSON.stringify(e) + ')', true);
+        showErrorAlert('Failed to Recover (' + JSON.stringify(e) + ')');
       }
     }
     setIsLoading(false);
@@ -292,9 +367,9 @@ const Setup = ({ navigation, route }) => {
   };
 
   const handleNumPress = (number: string) => {
-    Toast.hide();
     switch (mode) {
       case Mode.Create:
+        setMessage('');
         if (createPin.length < PIN_LENGTH) {
           setCreatePin(createPin + number);
         }
@@ -305,6 +380,7 @@ const Setup = ({ navigation, route }) => {
         }
         break;
       case Mode.Recover:
+        setMessage('');
         if (recoverPin.length < PIN_LENGTH) {
           setRecoverPin(recoverPin + number);
         }
@@ -326,51 +402,61 @@ const Setup = ({ navigation, route }) => {
     }
   };
 
-  const showErrorSheet = (error: string, noRetry: boolean = false) => {
-    const newPinLabel = 'Create New PIN';
-    const options = noRetry ? [newPinLabel] : ['Retry', newPinLabel];
-    ActionSheet.showActionSheetWithOptions(
-      {
-        title: error,
-        options: options,
-        destructiveButtonIndex: options.indexOf(newPinLabel),
-      },
-      (buttonIndex) => {
-        if (buttonIndex === options.indexOf(newPinLabel)) {
-          // Create a new PIN and start from step 1
-          setConfirmPin('');
-          setCreatePin('');
-          setRecoverPin('');
-          setMode(Mode.Create);
-        } else {
-          // Retry the confirmation step
-          setConfirmPin('');
-          setRecoverPin('');
-        }
-      }
+  const showErrorAlert = (error: string) => {
+    Alert.alert(
+      error,
+      undefined,
+      [
+        {
+          text: 'Create New PIN',
+          style: 'destructive',
+          onPress: () => {
+            // Create a new PIN and start from step 1
+            setConfirmPin('');
+            setCreatePin('');
+            setRecoverPin('');
+            setMessage('');
+            setMode(Mode.Create);
+          },
+        },
+        {
+          text: 'Retry',
+          onPress: () => {
+            // Retry the confirmation step
+            setConfirmPin('');
+            setRecoverPin('');
+          },
+        },
+      ],
+      { cancelable: false }
     );
   };
 
-  const showNotSignedInError = (message: string | null = null) => {
-    var message = message;
-    if (message == null) {
+  const showNotSignedInError = (m: string | null = null) => {
+    var m = m;
+    if (m == null) {
       switch (Platform.OS) {
         case 'ios':
-          message = 'Sign in with iCloud to continue.';
+          m = 'Sign in with iCloud to continue.';
           break;
         case 'android':
-          message = 'Sign in with Google to continue.';
+          m = 'Sign in with Google to continue.';
           break;
       }
     }
 
-    Toast.show({
-      type: 'error',
-      position: 'bottom',
-      text1: 'Storage Access Failed',
-      text2: message!,
-    });
-    navigation.goBack();
+    Alert.alert(
+      'Storage Access Failed',
+      m!,
+      [
+        {
+          text: 'Cancel',
+          style: 'cancel',
+          onPress: () => navigation.goBack(),
+        },
+      ],
+      { cancelable: false }
+    );
   };
 
   const currentPinLength = () => {
@@ -386,60 +472,84 @@ const Setup = ({ navigation, route }) => {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.stepText}>{modeTitleMapping[mode]}</Text>
-      <View style={styles.pinContainer}>
-        {Array(PIN_LENGTH)
-          .fill(0)
-          .map((_, index) => (
-            <View key={index} style={styles.pinCircle}>
-              {index < currentPinLength() ? (
-                <View style={styles.pinFilled} />
-              ) : null}
-            </View>
-          ))}
-      </View>
-      <View style={styles.numberPad}>
-        {Array(3)
-          .fill(0)
-          .map((_row, rowIndex) => (
-            <View key={rowIndex} style={styles.numberRow}>
-              {Array(3)
-                .fill(0)
-                .map((_column, colIndex) => {
-                  const number = rowIndex * 3 + colIndex + 1;
-                  return (
-                    <TouchableOpacity
-                      key={colIndex}
-                      style={styles.numberButton}
-                      onPress={() => handleNumPress(number.toString())}
-                    >
-                      <Text style={styles.numberText}>{number}</Text>
-                    </TouchableOpacity>
-                  );
-                })}
-            </View>
-          ))}
-        <View style={styles.numberRow}>
-          <TouchableOpacity style={styles.emptyButton} disabled>
-            <Text style={styles.numberText}>&nbsp;</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.numberButton}
-            onPress={() => handleNumPress('0')}
-          >
-            <Text style={styles.numberText}>0</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.numberButton}
-            onPress={handleBackspace}
-          >
-            <Text style={styles.backspaceText}>←</Text>
+      <SafeAreaView style={styles.safeArea}>
+        <View style={styles.backButtonContainer}>
+          <TouchableOpacity onPress={() => navigation.goBack()}>
+            <Image
+              source={require('../../assets/back.png')}
+              style={styles.backButton}
+            />
           </TouchableOpacity>
         </View>
-      </View>
+        <View style={styles.header}>
+          <Text style={styles.title}>{titleForMode(mode)}</Text>
+          <Text style={styles.subtitle}>{subtitleForMode(mode)}</Text>
+          <Animated.View
+            style={[
+              styles.pinContainer,
+              { transform: [{ translateX: shakeAnimation }] },
+            ]}
+          >
+            {Array(PIN_LENGTH)
+              .fill(0)
+              .map((_, index) => (
+                <View key={index} style={styles.pinCircle}>
+                  {index < currentPinLength() ? (
+                    <View style={styles.pinFilled} />
+                  ) : null}
+                </View>
+              ))}
+          </Animated.View>
+          <View style={styles.messageContainer}>
+            <Text style={styles.message}>{message}</Text>
+          </View>
+        </View>
+        <View style={styles.numberPad}>
+          {Array(3)
+            .fill(0)
+            .map((_row, rowIndex) => (
+              <View key={rowIndex} style={styles.numberRow}>
+                {Array(3)
+                  .fill(0)
+                  .map((_column, colIndex) => {
+                    const number = rowIndex * 3 + colIndex + 1;
+                    return (
+                      <TouchableOpacity
+                        key={colIndex}
+                        style={styles.numberButton}
+                        onPress={() => handleNumPress(number.toString())}
+                      >
+                        <Text style={styles.numberText}>{number}</Text>
+                      </TouchableOpacity>
+                    );
+                  })}
+              </View>
+            ))}
+          <View style={styles.numberRow}>
+            <TouchableOpacity style={styles.emptyButton} disabled>
+              <Text style={styles.numberText}>&nbsp;</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.numberButton}
+              onPress={() => handleNumPress('0')}
+            >
+              <Text style={styles.numberText}>0</Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.numberButton}
+              onPress={handleBackspace}
+            >
+              <Image
+                source={require('../../assets/back.png')}
+                style={styles.backButton}
+              />
+            </TouchableOpacity>
+          </View>
+        </View>
+      </SafeAreaView>
       {isLoading && (
         <View style={styles.activityIndicator}>
-          <ActivityIndicator color={'#531ac8'} size={'large'} />
+          <ActivityIndicator color={'#8c5eea'} size={'large'} />
         </View>
       )}
     </View>
@@ -450,36 +560,75 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#ffffff',
+    backgroundColor: '#1c1c1c',
   },
-  stepText: {
-    fontSize: 18,
+  safeArea: {
+    flex: 1,
+    width: '100%',
+  },
+  backButtonContainer: {
+    padding: 20,
+  },
+  backButton: {
+    width: 25,
+    height: 25,
+  },
+  header: {
+    flex: 1,
+    justifyContent: 'center',
+    height: '100%',
+    width: '100%',
+    paddingVertical: 30,
+    paddingHorizontal: 20,
+  },
+  title: {
+    fontSize: 24,
     marginBottom: 18,
-    color: '#6a737d',
+    color: '#fffdf8',
     fontWeight: 'bold',
   },
+  subtitle: {
+    fontSize: 18,
+    marginBottom: 18,
+    color: '#999999',
+    fontWeight: '500',
+  },
+  messageContainer: {
+    marginTop: 16,
+    paddingHorizontal: 20,
+    minHeight: 100,
+  },
+  message: {
+    fontSize: 18,
+    color: '#fffdf8',
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
   pinContainer: {
+    justifyContent: 'center',
     flexDirection: 'row',
-    marginBottom: 20,
+    marginVertical: 20,
+    height: 25,
   },
   pinCircle: {
-    width: 40,
-    height: 40,
+    width: 25,
+    height: 25,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: '#6a737d',
-    marginRight: 10,
+    borderColor: '#fffdf8',
+    marginRight: 15,
     justifyContent: 'center',
     alignItems: 'center',
   },
   pinFilled: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    backgroundColor: '#000000',
+    width: 25,
+    height: 25,
+    borderRadius: 20,
+    backgroundColor: '#fffdf8',
   },
   numberPad: {
+    flex: 1,
+    justifyContent: 'flex-end',
     flexDirection: 'column',
     alignItems: 'center',
   },
@@ -488,30 +637,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   numberButton: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 1,
-    borderColor: '#000000',
+    width: 90,
+    height: 60,
     margin: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },
   emptyButton: {
-    width: 80,
-    height: 80,
+    width: 90,
+    height: 60,
     margin: 10,
     justifyContent: 'center',
     alignItems: 'center',
   },
   numberText: {
-    fontSize: 24,
-    color: '#000000',
-  },
-  backspaceText: {
-    fontSize: 24,
-    color: '#000000',
-    marginTop: Platform.OS === 'android' ? -12 : 0,
+    fontSize: 32,
+    color: '#fffdf8',
   },
   activityIndicator: {
     flex: 1,

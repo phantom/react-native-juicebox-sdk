@@ -30,7 +30,7 @@ class RNJuiceboxSdk: NSObject {
             configuration: .init(json: configurationJson),
             authTokens: authentication
         )
-        Task {
+        Task(priority: .userInitiated) {
             do {
                 try await client.register(pin: Data(pin), secret: Data(secret), info: Data(info), guesses: UInt16(numGuesses))
                 resolve(())
@@ -60,7 +60,7 @@ class RNJuiceboxSdk: NSObject {
             configuration: .init(json: configurationJson),
             authTokens: authentication
         )
-        Task {
+        Task(priority: .userInitiated) {
             do {
                 let secret = try await client.recover(pin: Data(pin), info: Data(info))
                 resolve([UInt8](secret))
@@ -88,7 +88,7 @@ class RNJuiceboxSdk: NSObject {
             configuration: .init(json: configurationJson),
             authTokens: authentication
         )
-        Task {
+        Task(priority: .userInitiated) {
             do {
                 try await client.delete()
                 resolve(())
@@ -123,7 +123,7 @@ class RNJuiceboxSdk: NSObject {
             return reject("invalidSecretId", "invalid user id", ArgumentError.invalidSecretId)
         }
 
-        Task {
+        Task(priority: .userInitiated) {
             var authentication = [String: String]()
             for realmId in realmIds {
                 authentication[realmId.string] = await generator.vend(realmId: realmId, secretId: secretId).string()

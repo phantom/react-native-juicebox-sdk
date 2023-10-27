@@ -5,6 +5,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.Promise
 import com.google.android.gms.auth.blockstore.Blockstore
+import com.google.android.gms.auth.blockstore.DeleteBytesRequest
 import com.google.android.gms.auth.blockstore.RetrieveBytesRequest
 import com.google.android.gms.auth.blockstore.StoreBytesData
 
@@ -12,6 +13,25 @@ class SecretIdStorageModule(reactContext: ReactApplicationContext) :
     ReactContextBaseJavaModule(reactContext) {
 
     override fun getName() = NAME
+
+    @ReactMethod
+    fun isAvailable(promise: Promise) {
+        // TODO: Check if cloud backup is available and fallback to GDrive
+        promise.resolve(null)
+    }
+
+    @ReactMethod
+    fun delete(promise: Promise) {
+        val client = Blockstore.getClient(reactApplicationContext)
+        val deleteRequest = DeleteBytesRequest.Builder()
+          .setKeys(arrayListOf(SECRET_ID_BYTES_KEY))
+          .build()
+        client.deleteBytes(deleteRequest).addOnSuccessListener {
+            promise.resolve(null)
+        }.addOnFailureListener {
+            promise.reject("0", "failed $it", it)
+        }
+    }
 
     @ReactMethod
     fun register(secretId: String, promise: Promise) {

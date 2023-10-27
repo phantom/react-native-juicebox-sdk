@@ -23,6 +23,37 @@ class SecretIdStorage: NSObject {
   static let recordId = CKRecord.ID(recordName: "xyz.juicebox.jbid")
 
   @objc
+  func isAvailable(
+    _ resolve: @escaping RCTPromiseResolveBlock,
+    reject: @escaping RCTPromiseRejectBlock
+  ) {
+    Task {
+      do {
+        try await checkAccountStatus()
+        resolve(())
+      } catch {
+        reject("\((error as NSError).code)", "storage not available: \(error)", error)
+      }
+    }
+  }
+
+  @objc
+  func delete(
+    _ resolve: @escaping RCTPromiseResolveBlock,
+    reject: @escaping RCTPromiseRejectBlock
+  ) {
+    Task {
+      do {
+        try await checkAccountStatus()
+        try await container.privateCloudDatabase.deleteRecord(withID: Self.recordId)
+        resolve(())
+      } catch {
+        reject("\((error as NSError).code)", "Failed to delete record: \(error)", error)
+      }
+    }
+  }
+
+  @objc
   func register(
     _ secretId: String,
     resolve: @escaping RCTPromiseResolveBlock,

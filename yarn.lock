@@ -11052,13 +11052,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-native-action-sheet@npm:^2.2.0":
-  version: 2.2.0
-  resolution: "react-native-action-sheet@npm:2.2.0"
-  checksum: b8ad1c3b03f2ac2bb5e4dee70eeb6571daf8f7c12f953c59dc6e4e22f030a8f502dd1f21dd95ce2f94acb00642a196b3f02d95a92f82bf2ec23b6ad365fed1ac
-  languageName: node
-  linkType: hard
-
 "react-native-builder-bob@npm:^0.23.1":
   version: 0.23.1
   resolution: "react-native-builder-bob@npm:0.23.1"
@@ -11120,12 +11113,10 @@ __metadata:
     pod-install: ^0.1.0
     react: 18.2.0
     react-native: 0.72.6
-    react-native-action-sheet: ^2.2.0
     react-native-gesture-handler: ^2.13.3
     react-native-randombytes: ^3.6.1
     react-native-safe-area-context: ^4.7.3
     react-native-screens: ^3.26.0
-    react-native-toast-message: ^2.1.6
     text-encoding-polyfill: ^0.6.7
   languageName: unknown
   linkType: soft
@@ -11190,16 +11181,6 @@ __metadata:
     react: "*"
     react-native: "*"
   checksum: 18750fb15e80d2c2e4eea9992d1f07f72298e1f65b5c7614196c539f2191bed853d5c09cfaad33f1c8be0ae5d3f70e90458d1e842954e1090957dd42a71084f5
-  languageName: node
-  linkType: hard
-
-"react-native-toast-message@npm:^2.1.6":
-  version: 2.1.6
-  resolution: "react-native-toast-message@npm:2.1.6"
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  checksum: 250ce35cf3df05562ac19a0f1dd9ca3b0f4731021cc1f95a6291fe320a1122f8fbc55e6e4185c9bc0303c43b0acf1435861a0a08e05dc69495b06db818f1daa1
   languageName: node
   linkType: hard
 

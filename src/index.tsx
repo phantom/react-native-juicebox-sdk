@@ -404,10 +404,11 @@ export default {
       const match = regex.exec(e.code);
 
       if (match) {
-        throw {
-          reason: RecoverErrorReason.InvalidPin,
-          guessesRemaining: match[1],
-        };
+        throw new RecoverError(
+          RecoverErrorReason.InvalidPin,
+          // @ts-ignore
+          parseInt(match[1], 10)
+        );
       }
 
       throw e;
