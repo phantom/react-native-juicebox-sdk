@@ -8,11 +8,16 @@
         "!android/build",
         "src/*.ts",
         "src/*.tsx",
-        "demo/package.json",
-        "demo/android",
-        "!demo/android/.gradle",
-        "!demo/android/build",
-        "!demo/android/app/build"
+        "demo/email/package.json",
+        "demo/email/android",
+        "demo/serverless/package.json",
+        "demo/serverless/android",
+        "!demo/email/android/.gradle",
+        "!demo/email/android/build",
+        "!demo/email/android/app/build",
+        "!demo/serverless/android/.gradle",
+        "!demo/serverless/android/build",
+        "!demo/serverless/android/app/build"
       ],
       "outputs": []
     },
@@ -23,10 +28,14 @@
         "ios",
         "src/*.ts",
         "src/*.tsx",
-        "demo/package.json",
-        "demo/ios",
-        "!demo/ios/build",
-        "!demo/ios/Pods"
+        "demo/email/package.json",
+        "demo/email/ios",
+        "demo/serverless/package.json",
+        "demo/serverless/ios",
+        "!demo/email/ios/build",
+        "!demo/email/ios/Pods",
+        "!demo/serverless/ios/build",
+        "!demo/serverless/ios/Pods"
       ],
       "outputs": []
     }

@@ -14,15 +14,32 @@ yarn add react-native-juicebox-sdk
 
 # Demo
 
-A [demo](demo) implementation is available.
+Two [demo](demo) implementations are available.
+
+# E-mail
+
+The [email](demo/email) demo requires the user to authenticate with their email with a backend server. That server then generates tokens to authenticate with the Juicebox server.
 
 You can run it with:
 ```bash
 # using npm
-npm demo start
+npm demo-email start
 
 # OR using Yarn
-yarn demo start
+yarn demo-email start
+```
+
+# Serverless
+
+The [serverless](demo/serverless) demo generates tokens to authenticate with the Juicebox server locally on the device and relies on CloudKit records or Google's BlockStore to persist a user identifier.
+
+You can run it with:
+```bash
+# using npm
+npm demo-serverless start
+
+# OR using Yarn
+yarn demo-serverless start
 ```
 
 ## Usage

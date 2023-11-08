@@ -342,8 +342,6 @@ export default {
         g
       );
     } catch (e) {
-      console.log(JSON.stringify(e));
-
       // @ts-ignore
       switch (e.code) {
         case 'invalidAuth':

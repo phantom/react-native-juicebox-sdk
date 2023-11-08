@@ -26,11 +26,12 @@
     "!**/.*"
   ],
   "scripts": {
-    "demo": "yarn workspace react-native-juicebox-demo",
+    "demo-email": "yarn workspace react-native-juicebox-email-demo",
+    "demo-serverless": "yarn workspace react-native-juicebox-serverless-demo",
     "test": "jest",
     "typecheck": "tsc --noEmit",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
-    "clean": "del-cli android/build demo/android/build demo/android/app/build demo/ios/build lib",
+    "clean": "del-cli android/build demo/email/android/build demo/email/android/app/build demo/email/ios/build demo/serverless/android/build demo/serverless/android/app/build demo/serverless/ios/build lib",
     "prepare": "bob build",
     "release": "release-it"
   },
@@ -79,7 +80,8 @@
     "react-native": "*"
   },
   "workspaces": [
-    "demo"
+    "demo/email",
+    "demo/serverless"
   ],
   "packageManager": "yarn@3.6.1",
   "engines": {
@@ -88,7 +90,8 @@
   "jest": {
     "preset": "react-native",
     "modulePathIgnorePatterns": [
-      "<rootDir>/demo/node_modules",
+      "<rootDir>/demo/email/node_modules",
+      "<rootDir>/demo/serverless/node_modules",
       "<rootDir>/lib/"
     ]
   },
