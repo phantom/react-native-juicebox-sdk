@@ -7,9 +7,6 @@ on:
     branches:
       - main
 
-env:
-  INSTALL_RUST_VERSION: "1.73"
-
 jobs:
   lint:
     runs-on: ubuntu-latest
@@ -145,21 +142,13 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cocoapods-
 
-      - name: Install Rust
-        if: env.turbo_cache_hit != 1 && steps.cocoapods-cache.outputs.cache-hit != 'true'
-        run: |
-          rustup toolchain install ${{ env.INSTALL_RUST_VERSION }} --profile minimal --target x86_64-apple-ios,aarch64-apple-ios,aarch64-apple-ios-sim
-          rustup default ${{ env.INSTALL_RUST_VERSION }}
-
-      - name: Use Rust Cache
-        uses: Swatinem/rust-cache@v2
-
       - name: Set up Git
         if: env.turbo_cache_hit != 1 && steps.cocoapods-cache.outputs.cache-hit != 'true'
         run: |
           # Configures the global `git` CLI to be able to access private repos.
           # `pod` will make use of this.
           git config --global url."https://loam-bot:${{ secrets.ACCESS_TOKEN }}@github.com/juicebox-systems/juicebox-sdk.git".insteadOf 'git@github.com:juicebox-systems/juicebox-sdk.git'
+          git config --global url."https://loam-bot:${{ secrets.ACCESS_TOKEN }}@github.com/juicebox-systems/juicebox-sdk-artifacts.git".insteadOf 'git@github.com:juicebox-systems/juicebox-sdk-artifacts.git'
 
       - name: Install cocoapods
         if: env.turbo_cache_hit != 1 && steps.cocoapods-cache.outputs.cache-hit != 'true'

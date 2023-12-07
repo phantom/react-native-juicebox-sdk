@@ -121,10 +121,14 @@ const Email = ({ navigation, route }) => {
           {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email }),
+            body: JSON.stringify({
+              email,
+              appName: 'Juicebox',
+              logoPath:
+                'https://assets-global.website-files.com/64650413ab0c96a6b686cac9/6467eec48e8cabed89c29dc4_juicebox-logo-purple.png',
+            }),
           }
         );
-
         setIsLoading(false);
 
         if (response.status === 200) {

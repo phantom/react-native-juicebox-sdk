@@ -4,11 +4,13 @@ import (
 	"crypto/tls"
 	"fmt"
 	"html/template"
+	"io"
 	"net/mail"
 	"net/smtp"
 	"net/url"
 
 	"github.com/google/uuid"
+	"github.com/juicebox-systems/react-native-juicebox-sdk/demo-server/requests"
 )
 
 const serverName = "smtp-relay.gmail.com"
@@ -20,7 +22,7 @@ type TemplateOptions struct {
 	LogoPath string
 }
 
-func SendMagicLink(email string, token string) error {
+func SendMagicLink(request requests.EmailTokenRequest, token string) error {
 
 	uuid, err := uuid.NewRandom()
 	if err != nil {
@@ -28,7 +30,7 @@ func SendMagicLink(email string, token string) error {
 	}
 
 	noReplyAddress := mail.Address{
-		Name:    "Juicebox",
+		Name:    request.AppName,
 		Address: fmt.Sprintf("no-reply-%s@juicebox.me", uuid.String()),
 	}
 
@@ -36,8 +38,8 @@ func SendMagicLink(email string, token string) error {
 
 	templateOptions := TemplateOptions{
 		Token:    url.QueryEscape(token),
-		AppName:  "Juicebox",
-		LogoPath: "https://assets-global.website-files.com/64650413ab0c96a6b686cac9/6467eec48e8cabed89c29dc4_juicebox-logo-purple.png",
+		AppName:  request.AppName,
+		LogoPath: request.LogoPath,
 	}
 
 	bodyTemplate, err := template.ParseFiles("templates/mail.html")
@@ -48,17 +50,10 @@ func SendMagicLink(email string, token string) error {
 	// Setup headers
 	headers := make(map[string]string)
 	headers["From"] = noReplyAddress.String()
-	headers["To"] = email
+	headers["To"] = request.Email
 	headers["Subject"] = subject
 	headers["MIME-Version"] = "1.0"
 	headers["Content-Type"] = "text/html; charset=UTF-8"
-
-	// Setup message
-	message := ""
-	for k, v := range headers {
-		message += fmt.Sprintf("%s: %s\r\n", k, v)
-	}
-	message += "\r\n"
 
 	tlsConfig := tls.Config{
 		InsecureSkipVerify: false,
@@ -85,7 +80,7 @@ func SendMagicLink(email string, token string) error {
 		return err
 	}
 
-	if err := client.Rcpt(email); err != nil {
+	if err := client.Rcpt(request.Email); err != nil {
 		return err
 	}
 
@@ -96,11 +91,21 @@ func SendMagicLink(email string, token string) error {
 	}
 	defer wc.Close()
 
-	_, err = fmt.Fprint(wc, message)
+	// Write headers
+	for k, v := range headers {
+		_, err = fmt.Fprintf(wc, "%s: %s\r\n", k, v)
+		if err != nil {
+			return err
+		}
+	}
+
+	// End headers
+	_, err = io.WriteString(wc, "\r\n")
 	if err != nil {
 		return err
 	}
 
+	// Write body
 	err = bodyTemplate.Execute(wc, templateOptions)
 	if err != nil {
 		return err

@@ -60,17 +60,9 @@ const Setup = ({ navigation, route }) => {
     switch (m) {
       case Mode.Create:
       case Mode.Confirm:
-        return (
-          'Set a ' +
-          PIN_LENGTH +
-          '-digit passcode to recover and unlock your secret.'
-        );
+        return `Set a ${PIN_LENGTH}-digit passcode to recover and unlock your secret.`;
       case Mode.Recover:
-        return (
-          'Use the ' +
-          PIN_LENGTH +
-          '-digit passcode you created when creating your secret.'
-        );
+        return `Use the ${PIN_LENGTH}-digit passcode you created when creating your secret.`;
     }
   };
 

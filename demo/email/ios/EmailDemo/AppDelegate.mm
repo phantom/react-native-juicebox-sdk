@@ -32,37 +32,7 @@
   return [RCTLinkingManager application:application
                    continueUserActivity:userActivity
                      restorationHandler:restorationHandler];
-//  if (![userActivity.activityType isEqualToString:NSUserActivityTypeBrowsingWeb] || userActivity.webpageURL == nil) {
-//    return NO;
-//  }
-//
-//  return [self handleURL:userActivity.webpageURL];
 }
-//
-//- (BOOL)handleURL:(NSURL *)url {
-//  if (![url.path isEqualToString:@"/app/confirm"]) {
-//    return NO;
-//  }
-//
-//  NSURLComponents *components = [NSURLComponents componentsWithURL:url resolvingAgainstBaseURL:NO];
-//  for (NSURLQueryItem *item in components.queryItems) {
-//    if (![item.name isEqualToString:@"token"]) continue;
-//    _emailToken = item.value;
-//    break;
-//  }
-//
-//  self.emailTokenDidUpdate(self.emailToken);
-//
-//  return YES;
-//}
-//
-//- (void)setEmailTokenDidUpdate:(void (^)(NSString * _Nullable))emailTokenDidUpdate
-//{
-//  _emailTokenDidUpdate = emailTokenDidUpdate;
-//  if (self.emailToken) {
-//    emailTokenDidUpdate(self.emailToken);
-//  }
-//}
 
 - (NSURL *)sourceURLForBridge:(RCTBridge *)bridge
 {

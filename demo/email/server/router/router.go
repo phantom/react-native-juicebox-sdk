@@ -1,7 +1,7 @@
 package router
 
 import (
-	"crypto/rand"
+	cryptoRand "crypto/rand"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -18,11 +18,18 @@ import (
 	"golang.org/x/crypto/acme/autocert"
 )
 
+// Used to sign a JWT token for a Juicebox Realm. In a real word scenario,
+// this should be read from some secure secret storage, but for a demo this
+// is acceptable.
 var realmSigningKey = []byte{0x50, 0x77, 0xa1, 0xfd, 0x9d, 0xfb, 0xd6, 0x0e, 0xd0, 0xc7, 0x65, 0xca, 0x11, 0x4f, 0x67, 0x50, 0x8e, 0x65, 0xa1, 0x85, 0x0d, 0x39, 0x00, 0x19, 0x9e, 0xfc, 0x8a, 0x5f, 0x3d, 0xe6, 0x2c, 0x15}
 
 const realmSigningKeyVersion = 1
 const realmTenantName = "juiceboxdemo"
 
+// Used to sign a JWT provided to a user after e-mail verification, which can
+// be used for authenticated requests against this server.
+// In a real word scenario, this should be read from some secure secret storage,
+// but for a demo this is acceptable.
 var signingKey = []byte{0xbe, 0xfc, 0x3c, 0xc8, 0x3b, 0xfe, 0xa8, 0x91, 0xc1, 0xad, 0x27, 0xdd, 0x31, 0x9b, 0xe0, 0x33, 0xaf, 0xa3, 0xe9, 0x98, 0x44, 0xb4, 0x41, 0xa9, 0x2c, 0x5e, 0x43, 0x6a, 0x28, 0x1c, 0xdf, 0x1d}
 
 var mutex = sync.Mutex{}
@@ -37,6 +44,9 @@ func RunRouter() {
 	e.Use(middleware.Recover())
 	e.Use(middleware.CORS())
 
+	// Fetch a JWT token for a Juicebox Realm, using a `JuiceboxTokenRequest`.
+	//
+	// Requires authentication with a signed JWT acquired through e-mail verification.
 	e.POST("/juicebox-token", func(c echo.Context) error {
 		body, err := io.ReadAll(c.Request().Body)
 		if err != nil {
@@ -82,6 +92,12 @@ func RunRouter() {
 		},
 	}))
 
+	// Finishes e-mail verification and acquires an auth token for future requests
+	// against this server. This token can be used multiple times to request Juicebox
+	// tokens for multiple realms.
+	//
+	// Requires and consumes a one-time signed token sent to the user's e-mail, to verify
+	// their identity.
 	e.GET("/auth-token", func(c echo.Context) error {
 		requestToken, ok := c.Get("user").(*jwt.Token)
 		if !ok {
@@ -97,6 +113,7 @@ func RunRouter() {
 			Issuer:    "juicebox",
 			Subject:   subject,
 			NotBefore: jwt.NewNumericDate(time.Now()),
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 10)),
 		}
 
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -125,6 +142,10 @@ func RunRouter() {
 		},
 	}))
 
+	// Triggers the send of an e-mail to the user containing a one-time use token
+	// that can be used to acquire a longer lived authentication token for this server.
+	//
+	// Takes the request parameters specified in `EmailTokenRequest`
 	e.POST("/email-token", func(c echo.Context) error {
 		body, err := io.ReadAll(c.Request().Body)
 		if err != nil {
@@ -138,7 +159,10 @@ func RunRouter() {
 		}
 
 		signingKey := make([]byte, 32)
-		rand.Read(signingKey)
+		_, err = cryptoRand.Read(signingKey)
+		if err != nil {
+			return contextAwareError(c, http.StatusInternalServerError, "Error generating one-time signing key")
+		}
 
 		mutex.Lock()
 		defer mutex.Unlock()
@@ -159,7 +183,7 @@ func RunRouter() {
 			return contextAwareError(c, http.StatusBadRequest, "Error signing token")
 		}
 
-		err = mail.SendMagicLink(request.Email, signedToken)
+		err = mail.SendMagicLink(request, signedToken)
 		if err != nil {
 			return contextAwareError(c, http.StatusBadRequest, "Error sending email")
 		}
@@ -167,6 +191,8 @@ func RunRouter() {
 		return c.NoContent(http.StatusOK)
 	}, middleware.BodyLimit("2K"))
 
+	// Returns the mapping to allow iOS apps to be opened from deep links, e.g. the links
+	// included in the emails.
 	e.GET("/.well-known/apple-app-site-association", func(c echo.Context) error {
 		c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		return c.String(http.StatusOK, `
@@ -204,6 +230,8 @@ func RunRouter() {
 		`)
 	})
 
+	// Returns the mapping to allow android apps to be opened by deep links, e.g. the links
+	// included in the emails.
 	e.GET("/.well-known/assetlinks.json", func(c echo.Context) error {
 		c.Response().Header().Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 		return c.String(http.StatusOK, `
