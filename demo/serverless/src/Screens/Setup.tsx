@@ -261,12 +261,46 @@ const Setup = ({ navigation, route }) => {
     try {
       await SecretIdStorage.register(secretId);
     } catch (error) {
-      showNotSignedInError();
       setIsLoading(false);
+
+      // @ts-ignore
+      if (error.domain === 'CKErrorDomain') {
+        // @ts-ignore
+        if (error.code === '25') {
+          Alert.alert(
+            'iCloud Storage Full',
+            'Launch Settings, tap "iCloud", and free space before trying again.',
+            [
+              {
+                text: 'OK',
+                style: 'cancel',
+                onPress: () => navigation.goBack(),
+              },
+            ],
+            { cancelable: false }
+          );
+        } else {
+          Alert.alert(
+            'CloudKit Write Failure',
+            // @ts-ignore
+            error.message,
+            [
+              {
+                text: 'OK',
+                style: 'cancel',
+                onPress: () => navigation.goBack(),
+              },
+            ],
+            { cancelable: false }
+          );
+        }
+      } else {
+        showNotSignedInError();
+      }
+
       return;
     }
 
-    setIsLoading(false);
     await navigateToSecret(secret!);
   };
 

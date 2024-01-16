@@ -47,6 +47,8 @@ class SecretIdStorage: NSObject {
         try await checkAccountStatus()
         try await container.privateCloudDatabase.deleteRecord(withID: Self.recordId)
         resolve(())
+      } catch let e as CKError {
+        reject("\(e.errorCode)", e.localizedDescription, e)
       } catch {
         reject("\((error as NSError).code)", "Failed to delete record: \(error)", error)
       }
@@ -75,6 +77,8 @@ class SecretIdStorage: NSObject {
         try await container.privateCloudDatabase.save(record)
 
         resolve(())
+      } catch let e as CKError {
+        reject("\(e.errorCode)", e.localizedDescription, e)
       } catch {
         reject("\((error as NSError).code)", "Failed to save record: \(error)", error)
       }
