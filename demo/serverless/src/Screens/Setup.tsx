@@ -16,7 +16,6 @@ import {
   Easing,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import JuiceboxSdk, {
   type Configuration,
   type AuthenticationSigningParameters,
@@ -27,6 +26,8 @@ import JuiceboxSdk, {
 // @ts-ignore
 import { randomBytes } from 'react-native-randombytes';
 import { CommonActions } from '@react-navigation/native';
+import EncryptedStorage from 'react-native-encrypted-storage';
+import * as PeriodicReminders from '../PeriodicReminders';
 
 const { SecretIdStorage } = NativeModules;
 
@@ -34,6 +35,7 @@ enum Mode {
   Create = 'Create',
   Confirm = 'Confirm',
   Recover = 'Recover',
+  Verify = 'Verify',
 }
 
 // @ts-ignore
@@ -45,6 +47,8 @@ const Setup = ({ navigation, route }) => {
   const [createPin, setCreatePin] = useState('');
   const [confirmPin, setConfirmPin] = useState('');
   const [recoverPin, setRecoverPin] = useState('');
+  const [verifyPin, setVerifyPin] = useState('');
+  const [incorrectVerifyAttempts, setIncorrectVerifyAttempts] = useState(false);
   const [message, setMessage] = useState('');
 
   const PIN_LENGTH = 6;
@@ -57,6 +61,8 @@ const Setup = ({ navigation, route }) => {
         return 'Create passcode';
       case Mode.Recover:
         return 'Enter passcode';
+      case Mode.Verify:
+        return 'Verify passcode';
     }
   };
 
@@ -67,6 +73,8 @@ const Setup = ({ navigation, route }) => {
         return `Set a ${PIN_LENGTH}-digit passcode to recover and unlock your secret.`;
       case Mode.Recover:
         return `Use the ${PIN_LENGTH}-digit passcode you created when creating your secret.`;
+      case Mode.Verify:
+        return 'To help you memorize your passcode, we ask you to enter it periodically.';
     }
   };
 
@@ -136,7 +144,7 @@ const Setup = ({ navigation, route }) => {
         setSecret(Uint8Array.from(random));
       });
     };
-    if (mode === Mode.Create) createSecret();
+    if (mode === Mode.Create && secret === null) createSecret();
 
     if (secretId != null) return;
 
@@ -180,6 +188,15 @@ const Setup = ({ navigation, route }) => {
       }
     };
 
+    const restoreSecret = async () => {
+      const storedSecret = await EncryptedStorage.getItem('secret');
+      setSecret(
+        new Uint8Array(
+          storedSecret!.match(/.{1,2}/g)!.map((byte) => parseInt(byte, 16))
+        )
+      );
+    };
+
     switch (mode) {
       case Mode.Create:
       case Mode.Confirm:
@@ -187,6 +204,10 @@ const Setup = ({ navigation, route }) => {
         break;
       case Mode.Recover:
         restoreSecretId();
+        break;
+      case Mode.Verify:
+        restoreSecretId();
+        restoreSecret();
         break;
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -232,6 +253,49 @@ const Setup = ({ navigation, route }) => {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [recoverPin]);
+
+  useEffect(() => {
+    if (mode !== Mode.Verify) {
+      return;
+    }
+    if (verifyPin.length === PIN_LENGTH) {
+      confirmVerificationAndProceed();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [verifyPin]);
+
+  const confirmVerificationAndProceed = async () => {
+    const storedPin = await EncryptedStorage.getItem('pin');
+    if (verifyPin === storedPin) {
+      PeriodicReminders.completedReminder(incorrectVerifyAttempts);
+      navigation.dispatch(
+        CommonActions.reset({
+          index: 0,
+          routes: [{ name: 'Secret' }],
+        })
+      );
+    } else {
+      playShakeAnimation();
+      setIncorrectVerifyAttempts(true);
+      Alert.alert(
+        'Forgot passcode?',
+        'The incorrect passcode was entered.',
+        [
+          {
+            text: 'Try Again',
+            isPreferred: true,
+            onPress: () => setVerifyPin(''),
+          },
+          {
+            text: 'Change Passcode',
+            style: 'destructive',
+            onPress: () => setMode(Mode.Create),
+          },
+        ],
+        { cancelable: false }
+      );
+    }
+  };
 
   const storeSecretIdAndSecretAndProceed = async () => {
     setMessage('');
@@ -301,7 +365,7 @@ const Setup = ({ navigation, route }) => {
       return;
     }
 
-    await navigateToSecret(secret!);
+    await navigateToSecret(secret!, createPin);
   };
 
   const showDoYouWantToRestore = () => {
@@ -343,7 +407,7 @@ const Setup = ({ navigation, route }) => {
         encoder.encode(secretId!)
       );
       setSecret(recoveredSecret);
-      navigateToSecret(recoveredSecret);
+      navigateToSecret(recoveredSecret, recoverPin);
     } catch (e) {
       if (e instanceof RecoverError) {
         switch (e.reason) {
@@ -381,9 +445,11 @@ const Setup = ({ navigation, route }) => {
     setIsLoading(false);
   };
 
-  const navigateToSecret = async (s: Uint8Array) => {
+  const navigateToSecret = async (s: Uint8Array, pin: string) => {
     const hex = Buffer.from(s).toString('hex');
-    await AsyncStorage.setItem('secret', hex);
+    await PeriodicReminders.updateLastReminderTime();
+    await EncryptedStorage.setItem('secret', hex);
+    await EncryptedStorage.setItem('pin', pin);
     navigation.dispatch(
       CommonActions.reset({
         index: 0,
@@ -411,6 +477,12 @@ const Setup = ({ navigation, route }) => {
           setRecoverPin(recoverPin + number);
         }
         break;
+      case Mode.Verify:
+        setMessage('');
+        if (verifyPin.length < PIN_LENGTH) {
+          setVerifyPin(verifyPin + number);
+        }
+        break;
     }
   };
 
@@ -424,6 +496,9 @@ const Setup = ({ navigation, route }) => {
         break;
       case Mode.Recover:
         setRecoverPin(recoverPin.slice(0, -1));
+        break;
+      case Mode.Verify:
+        setVerifyPin(verifyPin.slice(0, -1));
         break;
     }
   };
@@ -493,20 +568,24 @@ const Setup = ({ navigation, route }) => {
         return confirmPin.length;
       case Mode.Recover:
         return recoverPin.length;
+      case Mode.Verify:
+        return verifyPin.length;
     }
   };
 
   return (
     <View style={styles.container}>
       <SafeAreaView style={styles.safeArea}>
-        <View style={styles.backButtonContainer}>
-          <TouchableOpacity onPress={() => navigation.goBack()}>
-            <Image
-              source={require('../../assets/back.png')}
-              style={styles.backButton}
-            />
-          </TouchableOpacity>
-        </View>
+        {navigation.canGoBack() && (
+          <View style={styles.backButtonContainer}>
+            <TouchableOpacity onPress={() => navigation.goBack()}>
+              <Image
+                source={require('../../assets/back.png')}
+                style={styles.backButton}
+              />
+            </TouchableOpacity>
+          </View>
+        )}
         <View style={styles.header}>
           <Text style={styles.title}>{titleForMode(mode)}</Text>
           <Text style={styles.subtitle}>{subtitleForMode(mode)}</Text>

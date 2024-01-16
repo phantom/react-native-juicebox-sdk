@@ -5,17 +5,32 @@ import {
   TouchableOpacity,
   StyleSheet,
   Platform,
+  AppState,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { CommonActions } from '@react-navigation/native';
+import EncryptedStorage from 'react-native-encrypted-storage';
+import * as PeriodicReminders from '../PeriodicReminders';
 
 // @ts-ignore
 const Secret = ({ navigation, route }) => {
   const [secret, setSecret] = useState('');
+  const [appState, setAppState] = useState(AppState.currentState);
+
+  useEffect(() => {
+    const appStateSubscription = AppState.addEventListener(
+      'change',
+      setAppState
+    );
+    return () => {
+      appStateSubscription.remove();
+    };
+  }, [appState]);
 
   const handleSignOut = async () => {
-    await AsyncStorage.removeItem('secret');
+    await PeriodicReminders.reset();
+    await EncryptedStorage.removeItem('secret');
+    await EncryptedStorage.removeItem('pin');
     navigation.dispatch(
       CommonActions.reset({
         index: 0,
@@ -25,8 +40,25 @@ const Secret = ({ navigation, route }) => {
   };
 
   useEffect(() => {
+    if (appState !== 'active') return;
+
+    const checkIsDueForReminder = async () => {
+      if (await PeriodicReminders.isDueForReminder()) {
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'Setup', params: { mode: 'Verify' } }],
+          })
+        );
+      }
+    };
+
+    checkIsDueForReminder();
+  }, [appState, navigation]);
+
+  useEffect(() => {
     const getSecret = async () => {
-      const storedSecret = await AsyncStorage.getItem('secret');
+      const storedSecret = await EncryptedStorage.getItem('secret');
       setSecret(storedSecret!.match(/.{1,8}/g)!.join(' '));
     };
     getSecret();

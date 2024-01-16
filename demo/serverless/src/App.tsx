@@ -3,7 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import { ActivityIndicator, View, StyleSheet } from 'react-native';
 
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import EncryptedStorage from 'react-native-encrypted-storage';
 
 import Start from './Screens/Start';
 import Setup from './Screens/Setup';
@@ -15,9 +15,11 @@ const App = () => {
   const [isSetupComplete, setIsSetupComplete] = useState<boolean | null>(null);
 
   useEffect(() => {
-    // Check if we have a secret on device in AsyncStorage when the app starts
+    // Check if we have a secret on device in SecureStore when the app starts
     const checkSetupState = async () => {
-      setIsSetupComplete((await AsyncStorage.getItem('secret')) !== null);
+      setIsSetupComplete(
+        (await EncryptedStorage.getItem('secret')) !== undefined
+      );
     };
     checkSetupState();
   }, []);

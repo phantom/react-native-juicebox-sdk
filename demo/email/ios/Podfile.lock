@@ -495,7 +495,7 @@ PODS:
   - RNGestureHandler (2.13.4):
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
-  - RNJuiceboxSdk (0.2.1):
+  - RNJuiceboxSdk (0.2.2):
     - JuiceboxSdk
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
@@ -745,7 +745,7 @@ SPEC CHECKSUMS:
   ReactCommon: dd03c17275c200496f346af93a7b94c53f3093a4
   RNCAsyncStorage: 3a8f7145d17cdd9f88e7b77666c94a09e4f759c8
   RNGestureHandler: 6e46dde1f87e5f018a54fe5d40cd0e0b942b49ee
-  RNJuiceboxSdk: baeb0c022d95da6c23938d86aceea8b9112b6aa6
+  RNJuiceboxSdk: 4fa94b4c07ce3629238b1be4c40939a625220b0b
   RNScreens: 3c2d122f5e08c192e254c510b212306da97d2581
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   Yoga: b76f1acfda8212aa16b7e26bcce3983230c82603
