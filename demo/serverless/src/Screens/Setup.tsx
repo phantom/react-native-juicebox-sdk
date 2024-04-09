@@ -131,9 +131,9 @@ const Setup = ({ navigation, route }) => {
   } as Configuration;
 
   const signingParameters = {
-    key: '5077a1fd9dfbd60ed0c765ca114f67508e65a1850d3900199efc8a5f3de62c15',
+    key: '302e020100300506032b65700422042070f4086a565233bd57bb577ddf7966d9d506e98e459eba6b4c521f04dd0f9d9c',
     tenant: 'juiceboxdemo',
-    version: 1,
+    version: 2,
   } as AuthenticationSigningParameters;
 
   const encoder = new TextEncoder();
