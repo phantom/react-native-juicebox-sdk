@@ -1,5 +1,5 @@
 {
-  "name": "react-native-juicebox-sdk",
+  "name": "@phantom/react-native-juicebox-sdk",
   "version": "0.3.0",
   "description": "React native SDK for Juicebox",
   "main": "lib/commonjs/index",
@@ -40,7 +40,7 @@
     "ios",
     "android"
   ],
-  "repository": "https://github.com/juicebox-systems/react-native-juicebox-sdk",
+  "repository": "https://github.com/phantom/react-native-juicebox-sdk",
   "author": "Nora Trapp <nora@juicebox.me> (https://github.com/juicebox-systems)",
   "license": "MIT",
   "bugs": {

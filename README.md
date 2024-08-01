@@ -1,5 +1,7 @@
+### This is a fork off of Juicebox's react native module because it doesn't work as intended
+Using this for now, we can also write a patch and open a PR in Juicebox's own module
+
 # react-native-juicebox-sdk
-Fork off of package
 React native SDK for Juicebox
 
 ## Installation
