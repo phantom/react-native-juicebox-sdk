@@ -17,7 +17,8 @@ Pod::Spec.new do |s|
 
   s.source_files = "ios/**/*.{h,m,mm,swift}"
   
-  s.vendored_libraries = "libjuicebox_sdk_ffi.a"
+  s.vendored_libraries = "libjuicebox_sdk_ffi_arm64.a"
+  s.vendored_libraries = "libjuicebox_sdk_ffi_x86.a"
   s.dependency "JuiceboxSdk"
 
   # Use install_modules_dependencies helper to install the dependencies if React Native version >=0.71.0.
