@@ -16,9 +16,14 @@ Pod::Spec.new do |s|
   s.source        = { :git => "https://github.com/juicebox-systems/react-native-juicebox-sdk.git", :tag => "#{s.version}" }
 
   s.source_files = "ios/**/*.{h,m,mm,swift}"
-  
-  s.vendored_libraries = "libjuicebox_sdk_ffi_arm64.a"
-  s.vendored_libraries = "libjuicebox_sdk_ffi_x86.a"
+
+  # Specify the vendored libraries for different architectures
+  s.vendored_libraries = [
+    './target/aarch64-apple-ios/libjuicebox_sdk_ffi.a',
+    './target/aarch64-apple-ios-sim/libjuicebox_sdk_ffi.a',
+    './target/x86_64/libjuicebox_sdk_ffi.a'
+  ]
+
   s.dependency "JuiceboxSdk"
 
   # Use install_modules_dependencies helper to install the dependencies if React Native version >=0.71.0.
@@ -26,21 +31,34 @@ Pod::Spec.new do |s|
   if respond_to?(:install_modules_dependencies, true)
     install_modules_dependencies(s)
   else
-  s.dependency "React-Core"
+    s.dependency "React-Core"
 
-  # Don't install the dependencies when we run `pod install` in the old architecture.
-  if ENV['RCT_NEW_ARCH_ENABLED'] == '1' then
-    s.compiler_flags = folly_compiler_flags + " -DRCT_NEW_ARCH_ENABLED=1"
-    s.pod_target_xcconfig    = {
+    # Don't install the dependencies when we run `pod install` in the old architecture.
+    if ENV['RCT_NEW_ARCH_ENABLED'] == '1' then
+      s.compiler_flags = folly_compiler_flags + " -DRCT_NEW_ARCH_ENABLED=1"
+      s.pod_target_xcconfig = {
         "HEADER_SEARCH_PATHS" => "\"$(PODS_ROOT)/boost\"",
         "OTHER_CPLUSPLUSFLAGS" => "-DFOLLY_NO_CONFIG -DFOLLY_MOBILE=1 -DFOLLY_USE_LIBCPP=1",
         "CLANG_CXX_LANGUAGE_STANDARD" => "c++17"
-    }
-    s.dependency "React-Codegen"
-    s.dependency "RCT-Folly"
-    s.dependency "RCTRequired"
-    s.dependency "RCTTypeSafety"
-    s.dependency "ReactCommon/turbomodule/core"
-   end
+      }
+      s.dependency "React-Codegen"
+      s.dependency "RCT-Folly"
+      s.dependency "RCTRequired"
+      s.dependency "RCTTypeSafety"
+      s.dependency "ReactCommon/turbomodule/core"
+    end
   end
+
+  s.script_phase = {
+    :name => 'Select appropriate libjuicebox_sdk_ffi.a',
+    :script => <<-SCRIPT
+      if [[ "$ARCHS" == "x86_64" ]]; then
+        cp "${PODS_ROOT}/target/x86_64/libjuicebox_sdk_ffi.a" "${TARGET_BUILD_DIR}/${TARGET_NAME}.framework"
+      elif [[ "$ARCHS" == "arm64" && "$EFFECTIVE_PLATFORM_NAME" == "-iphonesimulator" ]]; then
+        cp "${PODS_ROOT}/target/aarch64-apple-ios-sim/libjuicebox_sdk_ffi.a" "${TARGET_BUILD_DIR}/${TARGET_NAME}.framework"
+      elif [[ "$ARCHS" == "arm64" ]]; then
+        cp "${PODS_ROOT}/target/aarch64-apple-ios/libjuicebox_sdk_ffi.a" "${TARGET_BUILD_DIR}/${TARGET_NAME}.framework"
+      fi
+    SCRIPT
+  }
 end
