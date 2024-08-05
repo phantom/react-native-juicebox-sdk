@@ -1,6 +1,6 @@
 {
   "name": "@phantom/react-native-juicebox-sdk",
-  "version": "0.3.8",
+  "version": "0.3.9",
   "description": "React native SDK for Juicebox",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
