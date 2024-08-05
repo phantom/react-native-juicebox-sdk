@@ -1,6 +1,6 @@
 {
   "name": "@phantom/react-native-juicebox-sdk",
-  "version": "0.3.6",
+  "version": "0.3.7",
   "description": "React native SDK for Juicebox",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
@@ -14,7 +14,7 @@
     "ios",
     "cpp",
     "*.podspec",
-    "libjuicebox_sdk_ffi.a",
+    "target",
     "!ios/build",
     "!android/build",
     "!android/gradle",
