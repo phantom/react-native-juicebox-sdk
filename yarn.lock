@@ -2590,6 +2590,36 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@phantom/react-native-juicebox-sdk@workspace:.":
+  version: 0.0.0-use.local
+  resolution: "@phantom/react-native-juicebox-sdk@workspace:."
+  dependencies:
+    "@commitlint/config-conventional": ^17.0.2
+    "@react-native/eslint-config": ^0.72.2
+    "@release-it/conventional-changelog": ^5.0.0
+    "@types/jest": ^28.1.2
+    "@types/react": ~17.0.21
+    "@types/react-native": 0.70.0
+    commitlint: ^17.0.2
+    del-cli: ^5.0.0
+    eslint: ^8.4.1
+    eslint-config-prettier: ^8.5.0
+    eslint-plugin-prettier: ^4.0.0
+    jest: ^28.1.1
+    pod-install: ^0.1.0
+    prettier: ^2.0.5
+    react: 18.2.0
+    react-native: 0.72.6
+    react-native-builder-bob: ^0.23.1
+    release-it: ^15.0.0
+    turbo: ^1.10.7
+    typescript: ^5.0.2
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  languageName: unknown
+  linkType: soft
+
 "@pkgjs/parseargs@npm:^0.11.0":
   version: 0.11.0
   resolution: "@pkgjs/parseargs@npm:0.11.0"
@@ -11043,36 +11073,6 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"react-native-juicebox-sdk@workspace:.":
-  version: 0.0.0-use.local
-  resolution: "react-native-juicebox-sdk@workspace:."
-  dependencies:
-    "@commitlint/config-conventional": ^17.0.2
-    "@react-native/eslint-config": ^0.72.2
-    "@release-it/conventional-changelog": ^5.0.0
-    "@types/jest": ^28.1.2
-    "@types/react": ~17.0.21
-    "@types/react-native": 0.70.0
-    commitlint: ^17.0.2
-    del-cli: ^5.0.0
-    eslint: ^8.4.1
-    eslint-config-prettier: ^8.5.0
-    eslint-plugin-prettier: ^4.0.0
-    jest: ^28.1.1
-    pod-install: ^0.1.0
-    prettier: ^2.0.5
-    react: 18.2.0
-    react-native: 0.72.6
-    react-native-builder-bob: ^0.23.1
-    release-it: ^15.0.0
-    turbo: ^1.10.7
-    typescript: ^5.0.2
-  peerDependencies:
-    react: "*"
-    react-native: "*"
-  languageName: unknown
-  linkType: soft
-
 "react-native-juicebox-serverless-demo@workspace:demo/serverless":
   version: 0.0.0-use.local
   resolution: "react-native-juicebox-serverless-demo@workspace:demo/serverless"
@@ -12511,8 +12511,8 @@ __metadata:
   linkType: hard
 
 "tar@npm:^6.1.11, tar@npm:^6.1.2":
-  version: 6.2.0
-  resolution: "tar@npm:6.2.0"
+  version: 6.2.1
+  resolution: "tar@npm:6.2.1"
   dependencies:
     chownr: ^2.0.0
     fs-minipass: ^2.0.0
@@ -12520,7 +12520,7 @@ __metadata:
     minizlib: ^2.1.1
     mkdirp: ^1.0.3
     yallist: ^4.0.0
-  checksum: db4d9fe74a2082c3a5016630092c54c8375ff3b280186938cfd104f2e089c4fd9bad58688ef6be9cf186a889671bf355c7cda38f09bbf60604b281715ca57f5c
+  checksum: f1322768c9741a25356c11373bce918483f40fa9a25c69c59410c8a1247632487edef5fe76c5f12ac51a6356d2f1829e96d2bc34098668a2fc34d76050ac2b6c
   languageName: node
   linkType: hard
 
