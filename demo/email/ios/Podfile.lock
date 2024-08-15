@@ -73,7 +73,7 @@ PODS:
   - hermes-engine (0.72.6):
     - hermes-engine/Pre-built (= 0.72.6)
   - hermes-engine/Pre-built (0.72.6)
-  - JuiceboxSdk (0.3.0)
+  - JuiceboxSdk (0.3.2)
   - libevent (2.1.12)
   - OpenSSL-Universal (1.1.1100)
   - RCT-Folly (2021.07.22.00):
@@ -495,8 +495,8 @@ PODS:
   - RNGestureHandler (2.13.4):
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
-  - RNJuiceboxSdk (0.3.0):
-    - JuiceboxSdk
+  - RNJuiceboxSdk (0.3.2):
+    - JuiceboxSdk (= 0.3.2)
     - RCT-Folly (= 2021.07.22.00)
     - React-Core
   - RNScreens (3.27.0):
@@ -706,7 +706,7 @@ SPEC CHECKSUMS:
   fmt: ff9d55029c625d3757ed641535fd4a75fedc7ce9
   glog: 04b94705f318337d7ead9e6d17c019bd9b1f6b1b
   hermes-engine: 8057e75cfc1437b178ac86c8654b24e7fead7f60
-  JuiceboxSdk: 2a3bf39dfe2ae1ba4c222afddbbf1f2d0f9150c0
+  JuiceboxSdk: b2222491ce92b263694c217ea202a54b66c5ec5f
   libevent: 4049cae6c81cdb3654a443be001fb9bdceff7913
   OpenSSL-Universal: ebc357f1e6bc71fa463ccb2fe676756aff50e88c
   RCT-Folly: 424b8c9a7a0b9ab2886ffe9c3b041ef628fd4fb1
@@ -745,7 +745,7 @@ SPEC CHECKSUMS:
   ReactCommon: dd03c17275c200496f346af93a7b94c53f3093a4
   RNCAsyncStorage: 3a8f7145d17cdd9f88e7b77666c94a09e4f759c8
   RNGestureHandler: 6e46dde1f87e5f018a54fe5d40cd0e0b942b49ee
-  RNJuiceboxSdk: 1ca3b95c78fde25e56180a354b441513ed50fbd7
+  RNJuiceboxSdk: 7429f5d60719751a9c455a6aec97029954aa0580
   RNScreens: 3c2d122f5e08c192e254c510b212306da97d2581
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   Yoga: b76f1acfda8212aa16b7e26bcce3983230c82603
@@ -753,4 +753,4 @@ SPEC CHECKSUMS:
 
 PODFILE CHECKSUM: 048ca12dd7bc828696621bf52527b77ee53c3f71
 
-COCOAPODS: 1.13.0
+COCOAPODS: 1.15.2

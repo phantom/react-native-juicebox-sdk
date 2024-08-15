@@ -97,6 +97,6 @@ dependencies {
   //noinspection GradleDynamicVersion
   implementation "com.facebook.react:react-native:+"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
-  implementation "xyz.juicebox:sdk:0.3.0"
+  implementation "xyz.juicebox:sdk:0.3.2"
   implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4"
 }
