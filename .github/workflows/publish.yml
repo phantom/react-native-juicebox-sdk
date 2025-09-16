@@ -100,9 +100,9 @@ jobs:
           fi
           
           if [[ "$RELEASE_TYPE" == "pre"* ]]; then
-            echo "cmd=yarn release $RELEASE_TYPE --preRelease=$PRERELEASE_ID $DRY_RUN_FLAG --ci --verbose" >> $GITHUB_OUTPUT
+            echo "cmd=yarn release $RELEASE_TYPE --preRelease=$PRERELEASE_ID $DRY_RUN_FLAG --no-git.commit --ci --verbose" >> $GITHUB_OUTPUT
           else
-            echo "cmd=yarn release $RELEASE_TYPE $DRY_RUN_FLAG --ci --verbose" >> $GITHUB_OUTPUT
+            echo "cmd=yarn release $RELEASE_TYPE $DRY_RUN_FLAG --no-git.commit --ci --verbose" >> $GITHUB_OUTPUT
           fi
       
       - name: Run release
