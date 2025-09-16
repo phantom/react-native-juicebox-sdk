@@ -1,0 +1,123 @@
+name: Publish Package
+
+on:
+  workflow_dispatch:
+    inputs:
+      release_type:
+        description: 'Release type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+          - prepatch
+          - preminor
+          - premajor
+          - prerelease
+      prerelease_id:
+        description: 'Prerelease identifier (e.g., alpha, beta, rc)'
+        required: false
+        default: 'beta'
+      dry_run:
+        description: 'Dry run (simulate release without publishing)'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      packages: write
+      pull-requests: write
+      issues: write
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Configure git
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+      
+      - name: Install Yarn
+        run: |
+          corepack enable
+          corepack prepare yarn@3.6.1 --activate
+      
+      - name: Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "dir=$(yarn config get cacheFolder)" >> $GITHUB_OUTPUT
+      
+      - name: Cache yarn dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      
+      - name: Install dependencies
+        run: yarn install --immutable
+      
+      - name: Run tests
+        run: yarn test
+      
+      - name: Run typecheck
+        run: yarn typecheck
+      
+      - name: Run linter
+        run: yarn lint
+      
+      - name: Build package
+        run: yarn prepare
+      
+      - name: Configure npm authentication
+        run: |
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+      
+      - name: Determine release command
+        id: release_cmd
+        run: |
+          RELEASE_TYPE="${{ github.event.inputs.release_type }}"
+          DRY_RUN="${{ github.event.inputs.dry_run }}"
+          PRERELEASE_ID="${{ github.event.inputs.prerelease_id }}"
+          
+          if [ "$DRY_RUN" = "true" ]; then
+            DRY_RUN_FLAG="--dry-run"
+          else
+            DRY_RUN_FLAG=""
+          fi
+          
+          if [[ "$RELEASE_TYPE" == "pre"* ]]; then
+            echo "cmd=yarn release $RELEASE_TYPE --preRelease=$PRERELEASE_ID $DRY_RUN_FLAG --ci --verbose" >> $GITHUB_OUTPUT
+          else
+            echo "cmd=yarn release $RELEASE_TYPE $DRY_RUN_FLAG --ci --verbose" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Run release
+        run: ${{ steps.release_cmd.outputs.cmd }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      - name: Upload npm logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v3
+        with:
+          name: npm-logs
+          path: ~/.npm/_logs/
+          retention-days: 7
