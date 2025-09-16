@@ -85,9 +85,6 @@ jobs:
       - name: Build package
         run: yarn prepare
       
-      - name: Configure npm authentication
-        run: |
-          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
       
       - name: Determine release command
         id: release_cmd
@@ -112,7 +109,7 @@ jobs:
         run: ${{ steps.release_cmd.outputs.cmd }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_PUBLISH_TOKEN_PHANTOM_SECURITY_BOT }}
       
       - name: Upload npm logs on failure
         if: failure()
