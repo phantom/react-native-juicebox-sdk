@@ -1,0 +1,3 @@
+[submodule "external/juicebox-sdk"]
+	path = external/juicebox-sdk
+	url = https://github.com/phantom/juicebox-sdk.git
