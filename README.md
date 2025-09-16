@@ -47,6 +47,44 @@ npm install @phantom/react-native-juicebox-sdk
 yarn add @phantom/react-native-juicebox-sdk
 ```
 
+## Release Process
+
+This project uses [changesets](https://github.com/changesets/changesets) for version management and releasing.
+
+### Creating a Changeset
+
+When you make changes that should be released, create a changeset:
+
+```bash
+yarn changeset
+```
+
+This will prompt you to:
+1. Select which packages have changed (for single-package repos, just select the main package)
+2. Choose the version bump type (major, minor, or patch)
+3. Write a summary of the changes
+
+### Versioning and Publishing
+
+To prepare a new release:
+
+```bash
+# Update versions based on changesets
+yarn version
+
+# Publish to npm
+yarn release
+```
+
+The `version` command will:
+- Update the package version
+- Update the CHANGELOG.md
+- Remove the changeset files
+
+### Continuous Integration
+
+For automated releases, you can use the [changesets GitHub action](https://github.com/changesets/action) which will create PRs for version updates and handle releases automatically.
+
 # Demo
 
 Two [demo](demo) implementations are available.
