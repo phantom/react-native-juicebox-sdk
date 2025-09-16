@@ -1,5 +1,5 @@
 {
-  "name": "tian000-react-native-juicebox-sdk",
+  "name": "@phantom/react-native-juicebox-sdk",
   "version": "0.3.5",
   "description": "React native SDK for Juicebox",
   "main": "lib/commonjs/index",
