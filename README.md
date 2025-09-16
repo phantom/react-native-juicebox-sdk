@@ -1,17 +1,50 @@
-### This is a fork off of Juicebox's react native module because it doesn't work as intended
-Using this for now, we can also write a patch and open a PR in Juicebox's own module
-
 # react-native-juicebox-sdk
 React native SDK for Juicebox
+
+## Phantom Fork Changes
+
+This fork of the Juicebox React Native SDK includes the following changes:
+
+### Key Modifications
+
+1. **Git Submodule Integration**: The Juicebox SDK is now included as a git submodule at `external/juicebox-sdk`, pointing to Phantom's fork at `https://github.com/phantom/juicebox-sdk.git`
+
+2. **Local AAR Build**: Instead of using the published Maven package, the Android AAR is built locally from the submodule source
+
+NOTE: There are no changes to iOS version of ths library at this time.
+
+### Building the Android AAR
+
+If you need to rebuild the Android AAR file (e.g., after updating the submodule), run:
+
+```bash
+./scripts/build-juicebox-aar.sh
+```
+
+### Working with the Submodule
+
+When cloning this repository for the first time, initialize the submodule:
+
+```bash
+git submodule update --init --recursive
+```
+
+To update the Juicebox SDK submodule to the latest commit:
+
+```bash
+git submodule update --remote external/juicebox-sdk
+```
+
+After updating, remember to rebuild the Android AAR using the script above.
 
 ## Installation
 
 ```sh
 # using npm
-npm install react-native-juicebox-sdk
+npm install @phantom/react-native-juicebox-sdk
 
 # OR using Yarn
-yarn add react-native-juicebox-sdk
+yarn add @phantom/react-native-juicebox-sdk
 ```
 
 # Demo
@@ -53,7 +86,7 @@ import JuiceboxSdk, {
   PinHashingMode,
   RecoverError,
   RecoverErrorReason,
-} from 'react-native-juicebox-sdk';
+} from '@phantom/react-native-juicebox-sdk';
 
 const configuration = {
     realms: [
