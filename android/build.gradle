@@ -1,6 +1,5 @@
 apply plugin: "com.android.library"
 apply plugin: "kotlin-android"
-apply plugin: "com.facebook.react"
 
 def safeExtGet(prop, fallback) {
   rootProject.ext.has(prop) ? rootProject.ext.get(prop) : fallback
@@ -44,11 +43,14 @@ android {
 repositories {
   mavenCentral()
   google()
+  flatDir {
+    dirs "$projectDir/libs"
+  }
 }
 
 dependencies {
   //noinspection GradleDynamicVersion
   implementation "com.facebook.react:react-android:+"
-  implementation fileTree(dir: 'libs', include: ['*.aar', '*.jar'], exclude: [])
+  implementation(name: 'juicebox-sdk', ext: 'aar')
   implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3"
 }
