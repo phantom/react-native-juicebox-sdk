@@ -18,11 +18,25 @@ Pod::Spec.new do |s|
 
   s.dependency "JuiceboxSdk", "0.3.2"
 
-  # JuiceboxSdk uses a separate FFI module (JuiceboxSdkFfi) that is not automatically
-  # propagated to dependent targets. Add the search paths so RNJuiceboxSdk can resolve it.
+  # JuiceboxSdkFfi search paths so RNJuiceboxSdk can resolve the FFI module,
+  # plus React-Core headers for the bridging header with use_frameworks! :linkage => :static (RN 0.81+).
   s.pod_target_xcconfig = {
-    "HEADER_SEARCH_PATHS" => "$(PODS_ROOT)/JuiceboxSdk/swift/Sources/JuiceboxSdkFfi",
+    "HEADER_SEARCH_PATHS" => [
+      "$(PODS_ROOT)/JuiceboxSdk/swift/Sources/JuiceboxSdkFfi",
+      "$(PODS_ROOT)/Headers/Public/React-Core",
+      "$(PODS_ROOT)/Headers/Public"
+    ].join(" "),
     "SWIFT_INCLUDE_PATHS" => "$(PODS_ROOT)/JuiceboxSdk/swift/Sources/JuiceboxSdkFfi"
+  }
+
+  # The JuiceboxSdk FFI static library must be linked into the final app binary.
+  # pod_target_xcconfig OTHER_LDFLAGS don't propagate transitively with static frameworks,
+  # so we use user_target_xcconfig to set them on the consuming app target.
+  s.user_target_xcconfig = {
+    "OTHER_LDFLAGS" => "$(PODS_ROOT)/JuiceboxSdk/artifacts/ffi/$(CARGO_BUILD_TARGET)/libjuicebox_sdk_ffi.a",
+    "CARGO_BUILD_TARGET[sdk=iphonesimulator*][arch=arm64]" => "aarch64-apple-ios-sim",
+    "CARGO_BUILD_TARGET[sdk=iphonesimulator*][arch=*]" => "x86_64-apple-ios",
+    "CARGO_BUILD_TARGET[sdk=iphoneos*]" => "aarch64-apple-ios"
   }
 
   # Use install_modules_dependencies helper to install the dependencies if React Native version >=0.71.0.

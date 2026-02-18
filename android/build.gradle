@@ -43,14 +43,11 @@ android {
 repositories {
   mavenCentral()
   google()
-  flatDir {
-    dirs "$projectDir/libs"
-  }
 }
 
 dependencies {
   //noinspection GradleDynamicVersion
   implementation "com.facebook.react:react-android:+"
-  implementation(name: 'juicebox-sdk', ext: 'aar')
+  implementation files("$projectDir/libs/juicebox-sdk.aar")
   implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3"
 }
