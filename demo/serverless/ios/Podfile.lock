@@ -2401,7 +2401,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - SocketRocket
     - Yoga
-  - RNJuiceboxSdk (0.3.16):
+  - RNJuiceboxSdk (0.3.18):
     - boost
     - DoubleConversion
     - fast_float
@@ -2815,11 +2815,11 @@ SPEC CHECKSUMS:
   ReactCommon: 8fafefb37d562f9e4bbbc9081ca4501f178a97ec
   RNCAsyncStorage: 29f0230e1a25f36c20b05f65e2eb8958d6526e82
   RNGestureHandler: e37bdb684df1ac17c7e1d8f71a3311b2793c186b
-  RNJuiceboxSdk: 7db08df5bfd9fa3d96e2408363833ddc8c1b8800
+  RNJuiceboxSdk: 5447938eb4bed17d4fcb91100e15ed2c6292ef75
   RNScreens: afaf526a9c804c3b4503f950cf3e67ed81e29ada
   SocketRocket: d4aabe649be1e368d1318fdf28a022d714d65748
-  Yoga: 2b7ef72240240d882eda2f9a2be454a04fc230f5
+  Yoga: 3196a843cc5f4bc433f1a41cf17cdf804a01a529
 
-PODFILE CHECKSUM: fda26268c232cef603cc54e061fcbc1dc5a01540
+PODFILE CHECKSUM: 355f75fcc79e7dfb82eecf50481c0cbdaeab4d36
 
-COCOAPODS: 1.15.2
+COCOAPODS: 1.16.2

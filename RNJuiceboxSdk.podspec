@@ -12,7 +12,7 @@ Pod::Spec.new do |s|
 
   s.swift_version = '5'
   s.platforms     = { :ios => "16.0" }
-  s.source        = { :git => "https://github.com/juicebox-systems/react-native-juicebox-sdk.git", :tag => "#{s.version}" }
+  s.source        = { :git => "https://github.com/juicebox-systems/react-native-juicebox-sdk.git", :tag => s.version.to_s }
 
   s.source_files = "ios/**/*.{h,m,mm,swift}"
 
@@ -22,11 +22,12 @@ Pod::Spec.new do |s|
   # plus React-Core headers for the bridging header with use_frameworks! :linkage => :static (RN 0.81+).
   s.pod_target_xcconfig = {
     "HEADER_SEARCH_PATHS" => [
+      "$(inherited)",
       "$(PODS_ROOT)/JuiceboxSdk/swift/Sources/JuiceboxSdkFfi",
       "$(PODS_ROOT)/Headers/Public/React-Core",
       "$(PODS_ROOT)/Headers/Public"
     ].join(" "),
-    "SWIFT_INCLUDE_PATHS" => "$(PODS_ROOT)/JuiceboxSdk/swift/Sources/JuiceboxSdkFfi"
+    "SWIFT_INCLUDE_PATHS" => "$(inherited) $(PODS_ROOT)/JuiceboxSdk/swift/Sources/JuiceboxSdkFfi"
   }
 
   # The JuiceboxSdk FFI static library must be linked into the final app binary.

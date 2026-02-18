@@ -51,10 +51,12 @@ target 'ServerlessDemo' do
 
     # Disable Folly coroutines — RCT-Folly doesn't ship folly/coro headers
     # but newer Xcode/clang detects coroutine support and tries to include them
-    installer.pods_project.targets.each do |bc|
-      bc.build_configurations.each do |bc|
-        bc.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] ||= ['$(inherited)']
-        bc.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] << 'FOLLY_CFG_NO_COROUTINES=1'
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |bc|
+        defs = Array(bc.build_settings['GCC_PREPROCESSOR_DEFINITIONS'])
+        defs << '$(inherited)' unless defs.include?('$(inherited)')
+        defs << 'FOLLY_CFG_NO_COROUTINES=1' unless defs.include?('FOLLY_CFG_NO_COROUTINES=1')
+        bc.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] = defs
       end
     end
 

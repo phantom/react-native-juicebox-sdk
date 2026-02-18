@@ -18,7 +18,7 @@ const App = () => {
     // Check if we have a secret on device in SecureStore when the app starts
     const checkSetupState = async () => {
       setIsSetupComplete(
-        (await EncryptedStorage.getItem('secret')) !== undefined
+        (await EncryptedStorage.getItem('secret')) != null
       );
     };
     checkSetupState();

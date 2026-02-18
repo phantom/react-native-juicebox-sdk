@@ -18,11 +18,13 @@ const config = {
   // We need to make sure that only one version is loaded for peerDependencies
   // So we block them at the root, and alias them to the versions in example's node_modules
   resolver: {
-    blockList: new RegExp(
-      modules
-        .map((m) => `${escape(path.join(root, 'node_modules', m))}\\/.*$`)
-        .join('|')
-    ),
+    blockList: modules.length
+      ? new RegExp(
+          modules
+            .map((m) => `${escape(path.join(root, 'node_modules', m))}\\/.*$`)
+            .join('|')
+        )
+      : undefined,
 
     extraNodeModules: modules.reduce((acc, name) => {
       acc[name] = path.join(__dirname, 'node_modules', name);
