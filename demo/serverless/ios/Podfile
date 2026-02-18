@@ -5,19 +5,8 @@ require Pod::Executable.execute_command('node', ['-p',
     {paths: [process.argv[1]]},
   )', __dir__]).strip
 
-platform :ios, 13
+platform :ios, '16.0'
 prepare_react_native_project!
-
-# If you are using a `react-native-flipper` your iOS build will fail when `NO_FLIPPER=1` is set.
-# because `react-native-flipper` depends on (FlipperKit,...) that will be excluded
-#
-# To fix this you can also exclude `react-native-flipper` using a `react-native.config.js`
-# ```js
-# module.exports = {
-#   dependencies: {
-#     ...(process.env.NO_FLIPPER ? { 'react-native-flipper': { platforms: { ios: null } } } : {}),
-# ```
-flipper_config = ENV['NO_FLIPPER'] == "1" ? FlipperConfiguration.disabled : FlipperConfiguration.enabled
 
 linkage = ENV['USE_FRAMEWORKS']
 if linkage != nil
@@ -41,21 +30,10 @@ target 'ServerlessDemo' do
       end
   end
 
-  # Flags change depending on the env values.
-  flags = get_default_flags()
-
   use_react_native!(
     :path => config[:reactNativePath],
-    # Hermes is now enabled by default. Disable by setting this flag to false.
-    :hermes_enabled => flags[:hermes_enabled],
-    :fabric_enabled => flags[:fabric_enabled],
-    # Enables Flipper.
-    #
-    # Note that if you have use_frameworks! enabled, Flipper will not work and
-    # you should disable the next line.
-    :flipper_configuration => flipper_config,
-    # An absolute path to your application root.
-    :app_path => "#{Pod::Config.instance.installation_root}/.."
+    :app_path => "#{Pod::Config.instance.installation_root}/..",
+    :new_arch_enabled => true
   )
 
   target 'ServerlessDemoTests' do
@@ -70,6 +48,28 @@ target 'ServerlessDemo' do
       config[:reactNativePath],
       :mac_catalyst_enabled => false
     )
-    __apply_Xcode_12_5_M1_post_install_workaround(installer)
+
+    # Disable Folly coroutines — RCT-Folly doesn't ship folly/coro headers
+    # but newer Xcode/clang detects coroutine support and tries to include them
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |bc|
+        defs = Array(bc.build_settings['GCC_PREPROCESSOR_DEFINITIONS'])
+        defs << '$(inherited)' unless defs.include?('$(inherited)')
+        defs << 'FOLLY_CFG_NO_COROUTINES=1' unless defs.include?('FOLLY_CFG_NO_COROUTINES=1')
+        bc.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] = defs
+      end
+    end
+
+    # Also propagate to app target via the Pods-generated xcconfig files
+    Dir.glob(File.join(installer.sandbox.root, 'Target Support Files', 'Pods-*', '*.xcconfig')).each do |xcconfig_path|
+      content = File.read(xcconfig_path)
+      next if content.include?('FOLLY_CFG_NO_COROUTINES')
+      if content =~ /^GCC_PREPROCESSOR_DEFINITIONS\s*=/
+        content.gsub!(/^(GCC_PREPROCESSOR_DEFINITIONS\s*=.*)$/, '\1 FOLLY_CFG_NO_COROUTINES=1')
+      else
+        content += "GCC_PREPROCESSOR_DEFINITIONS = $(inherited) FOLLY_CFG_NO_COROUTINES=1\n"
+      end
+      File.write(xcconfig_path, content)
+    end
   end
 end
