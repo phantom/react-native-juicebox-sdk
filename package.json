@@ -76,7 +76,8 @@
   },
   "resolutions": {
     "@types/react": "~19.1.0",
-    "vm2": "3.11.0"
+    "vm2": "3.11.0",
+    "micromatch": "^4.0.8"
   },
   "peerDependencies": {
     "react": "*",
